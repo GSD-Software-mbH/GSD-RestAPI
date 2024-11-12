@@ -2,9 +2,6 @@
 pool:
   name: default
 
-variables:
-  number: $[counter(1)]
-
 stages:
   - stage: VersionBump
     pool:
@@ -38,7 +35,7 @@ stages:
             condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
             inputs:
               script: |
-                git commit -a -m "Vesion patch"
+                git commit -a -m "Vesion patch [skip ci]"
                 git tag -a $(Build.BuildNumber) -m "Version $(Build.BuildNumber)"
                 git config --global user.email "buildAgent@gsd-software.com"
                 git config --global user.name "Build Agent"
