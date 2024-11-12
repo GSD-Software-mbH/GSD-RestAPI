@@ -2,57 +2,59 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:pointycastle/pointycastle.dart';
 
+/// Erweiterung für `String`, um die Parsing-Funktionalität für RSA-öffentliche Schlüssel im PEM-Format hinzuzufügen
 extension StringExtensions on String {
-  // Funktion zur Entschlüsselung des öffentlichen Schlüssels
+  /// Funktion zum Parsen eines öffentlichen Schlüssels aus dem PEM-Format und Rückgabe als `RSAPublicKey`
   RSAPublicKey parsePublicKeyFromPem() {
-    // Entferne Header und Footer und dekodiere den Base64 PEM-Block
+    // Entferne die PEM-Header und -Footer und dekodiere den Base64-PEM-Block
     final pemLines = split('\n');
     final base64String = pemLines.where((line) => line.isNotEmpty && !line.startsWith('---')).join();
     final bytes = base64.decode(base64String);
 
-    // Parsing der ASN.1-Struktur
+    // Parsen der ASN.1-Struktur
     final asn1Parser = ASN1Parser(bytes);
     final topLevelSeq = asn1Parser.nextObject() as ASN1Sequence;
 
-    // Innerhalb der Top-Level-Sequenz befindet sich der Algorithmus-Identifier und der öffentliche Schlüssel
+    // Die oberste Sequenz enthält den Algorithmus-Identifier und den öffentlichen Schlüssel
     final publicKeyBitString = topLevelSeq.elements![1] as ASN1BitString;
 
-    // Extrahiere den Inhalt des BitStrings (das ist der eigentliche öffentliche Schlüssel)
+    // Extrahiere den Inhalt des BitStrings (dies ist der tatsächliche öffentliche Schlüssel)
     final publicKeyBytes = publicKeyBitString.stringValues;
 
-    // Parsing der Public-Key-Struktur (die in den BitString-Daten enthalten ist)
+    // Parsen der Struktur des öffentlichen Schlüssels innerhalb der BitString-Daten
     final publicKeyAsn1Parser = ASN1Parser(Uint8List.fromList(publicKeyBytes!));
     final publicKeySeq = publicKeyAsn1Parser.nextObject() as ASN1Sequence;
 
-    // Modulus (n) und Exponent (e) extrahieren
+    // Extrahiere Modulus (n) und Exponent (e) aus der Sequenz
     final ASN1Integer modulusASN1 = publicKeySeq.elements![0] as ASN1Integer;
     final ASN1Integer exponentASN1 = publicKeySeq.elements![1] as ASN1Integer;
 
-    // Modulus und Exponent in BigInt umwandeln
+    // Konvertiere Modulus und Exponent in BigInt
     final modulusBigInt = BigInt.parse(modulusASN1.valueBytes!.bytesToHex(), radix: 16);
     final exponentBigInt = BigInt.parse(exponentASN1.valueBytes!.bytesToHex(), radix: 16);
 
-    // Erstelle den RSAPublicKey
+    // Erstelle den `RSAPublicKey`
     return RSAPublicKey(modulusBigInt, exponentBigInt);
   }
 }
 
+/// Erweiterung für `RSAPublicKey`, um die Konvertierung des RSA Public Keys ins PEM-Format hinzuzufügen
 extension RSAPublicKeyExtention on RSAPublicKey {
-  // Funktion, um den RSA Public Key ins PEM-Format zu konvertieren
+  /// Funktion zur Kodierung des RSA-öffentlichen Schlüssels in das PEM-Format
   String encodeToPem() {
     // Erstelle ASN.1-Objekte für Modulus und Exponent
     final asn1Modulus = ASN1Integer(modulus!);
     final asn1Exponent = ASN1Integer(exponent!);
 
-    // Erstelle die ASN.1-Sequenz, die den Modulus und Exponent enthält
+    // Erstelle die ASN.1-Sequenz, die Modulus und Exponent enthält
     final asn1Seq = ASN1Sequence();
     asn1Seq.add(asn1Modulus);
     asn1Seq.add(asn1Exponent);
 
-    // Kodieren der publicKey-Bytes in ein BitString
+    // Kodieren der `publicKey`-Bytes in einen BitString
     final publicKeyBytes = asn1Seq.encode();
 
-    // Verpakke die publicKeyBytes in einen BitString
+    // Verpacke die `publicKeyBytes` in einen BitString
     final publicKeyBitString = ASN1BitString(stringValues: publicKeyBytes);
 
     // Erstelle die Algorithmen-Sequenz
@@ -65,10 +67,10 @@ extension RSAPublicKeyExtention on RSAPublicKey {
     topLevelSeq.add(algorithmSeq);
     topLevelSeq.add(publicKeyBitString);
 
-    // Jetzt sollte die Top-Level-Sequenz korrekt kodiert werden
+    // Kodierung der Top-Level-Sequenz in Base64
     final base64Key = base64Encode(topLevelSeq.encode());
 
-    // PEM-Format erstellen
+    // Erstelle das PEM-Format
     final pemString = """
     -----BEGIN PUBLIC KEY-----
     ${_chunked(base64Key, 64)}
@@ -78,13 +80,16 @@ extension RSAPublicKeyExtention on RSAPublicKey {
     return pemString;
   }
 
+  /// Funktion, um den Base64-String in bestimmte Zeilenlängen zu unterteilen
   String _chunked(String str, int chunkSize) {
     final RegExp pattern = RegExp('.{1,$chunkSize}');
     return pattern.allMatches(str).map((m) => m.group(0)).join('\r\n');
   }
 }
 
+/// Erweiterung für `Uint8List`, um eine Funktion zur Konvertierung von Bytes in einen Hex-String hinzuzufügen
 extension Uint8ListExtention on Uint8List {
+  /// Konvertiert die Bytes in einen Hexadezimal-String
   String bytesToHex() {
     return map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
   }
