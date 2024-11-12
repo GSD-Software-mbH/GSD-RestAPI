@@ -156,24 +156,51 @@ class EncryptionManager {
 
   /// Initialisiert den AES-Schlüssel durch Erzeugen eines neuen Schlüssels oder durch Abrufen aus dem Speicher.
   Future<void> initializeAESKey() async {
+    // Überprüft, ob der Schlüssel bereits existiert
     if (_keyAES != null) {
-      return;
+      return; // Beendet die Methode, wenn der Schlüssel bereits gesetzt ist
     }
 
+    // Liest den gespeicherten Schlüssel aus dem sicheren Speicher
     String? storedKey = await _secureStorage.read(key: _aesKeyStorageKey);
 
+    // Überprüft, ob ein Schlüssel im Speicher vorhanden ist
     if (storedKey == null) {
       // Generiert einen neuen Schlüssel, falls keiner gespeichert ist
-      final secureRandom = Random.secure();
-      final keyBytes = List<int>.generate(32, (_) => secureRandom.nextInt(256)); // 256-Bit-AES-Schlüssel
-      storedKey = base64UrlEncode(keyBytes);
+      Key key = await generateRandomAESKey();
 
+      // Kodiert den Schlüssel als Base64-String
+      storedKey = key.base64;
+
+      // Speichert den neuen Schlüssel im sicheren Speicher
       await _secureStorage.write(key: _aesKeyStorageKey, value: storedKey);
     }
 
     // Setzt den abgerufenen oder neu generierten Schlüssel
     _keyAES = Key.fromBase64(storedKey);
   }
+
+  /// Generiert einen zufälligen AES-Schlüssel
+  Future<Key> generateRandomAESKey() async {
+    // Erstellt einen sicheren Zufallszahlengenerator
+    final secureRandom = Random.secure();
+
+    // Generiert ein Byte-Array der Länge 32 für den AES-256-Schlüssel
+    final keyBytes = List<int>.generate(32, (_) => secureRandom.nextInt(256));
+
+    // Erzeugt den Schlüssel auf Basis der generierten Bytes
+    return generateAESKey(keyBytes);
+  }
+
+  /// Wandelt das Byte-Array in einen Base64-kodierten AES-Schlüssel um und erstellt das Key-Objekt
+  Key generateAESKey(List<int> bytes) {
+    // Kodiert die Bytes als Base64-String
+    final base64Key = base64UrlEncode(bytes);
+
+    // Erstellt und gibt ein Key-Objekt auf Basis des Base64-Strings zurück
+    return Key.fromBase64(base64Key);
+  }
+
 
   /// Generiert einen sicheren, zufälligen IV für jede Verschlüsselung.
   IV _generateRandomIV() {

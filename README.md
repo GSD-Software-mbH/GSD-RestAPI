@@ -23,7 +23,7 @@ Führen Sie anschließend `flutter pub get` aus, um das Paket zu installieren.
 Erstellen Sie eine Instanz des `EncryptionManager` für die Verschlüsselungs- und Entschlüsselungsfunktionen:
 
 ```dart
-import 'package:encryption/encryption.dart';
+import 'package:encryption/encryptionmanager.dart';
 
 final encryptionManager = EncryptionManager();
 ```
