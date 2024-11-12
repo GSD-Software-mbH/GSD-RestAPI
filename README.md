@@ -1,39 +1,73 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Flutter Encryption
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+Dieses Paket bietet AES- und RSA-Verschlüsselungs- und Entschlüsselungsfunktionen für Flutter-Anwendungen und erleichtert die sichere Speicherung und Verarbeitung von sensiblen Daten. Es umfasst Funktionen zur Verwaltung von Schlüsseln (sowohl symmetrische als auch asymmetrische) und zur sicheren Speicherung im Gerät.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+## Installation
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+Fügen Sie das Paket in Ihrer `pubspec.yaml` hinzu:
 
-## Features
-
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
-```dart
-const like = 'sample';
+```yaml
+dependencies:
+  encryption:
+    git:
+      url: http://gsd-dfdev:8080/tfs/DefaultCollection/Flutter%20Encryption/_git/Flutter%20Encryption
+      ref: master
 ```
 
-## Additional information
+Führen Sie anschließend `flutter pub get` aus, um das Paket zu installieren.
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+## Nutzung
+
+### Initialisieren des EncryptionManager
+
+Erstellen Sie eine Instanz des `EncryptionManager` für die Verschlüsselungs- und Entschlüsselungsfunktionen:
+
+```dart
+import 'package:encryption/encryption.dart';
+
+final encryptionManager = EncryptionManager();
+```
+
+### AES-Verschlüsselung und -Entschlüsselung
+
+1. **AES-Schlüssel initialisieren**: Rufen Sie `initializeAESKey()` auf, um den AES-Schlüssel zu generieren und sicher zu speichern.
+2. **Text verschlüsseln**:
+   ```dart
+   String encryptedText = await encryptionManager.encryptAES('Ihr Klartext');
+   ```
+3. **Text entschlüsseln**:
+   ```dart
+   String decryptedText = await encryptionManager.decryptAES(encryptedText);
+   ```
+
+### RSA-Verschlüsselung und -Entschlüsselung
+
+1. **RSA-Schlüsselpaar initialisieren**: Rufen Sie `initializeRSAKeyPair()` auf, um ein RSA-Schlüsselpaar zu generieren.
+2. **Text verschlüsseln**:
+   ```dart
+   String encryptedText = await encryptionManager.encryptRSA('Ihr Klartext');
+   ```
+3. **Text entschlüsseln**:
+   ```dart
+   String decryptedText = await encryptionManager.decryptRSA(encryptedText);
+   ```
+
+### Verwendung der PEM-Funktionen
+
+Um einen RSA-Schlüssel im PEM-Format zu parsen oder zu exportieren, nutzen Sie die Erweiterungen:
+
+1. **PEM-Format in `RSAPublicKey` konvertieren**:
+   ```dart
+   RSAPublicKey publicKey = 'Ihr PEM-Schlüssel'.parsePublicKeyFromPem();
+   ```
+2. **`RSAPublicKey` ins PEM-Format konvertieren**:
+   ```dart
+   String pemString = publicKey.encodeToPem();
+   ```
+
+## Hinweise
+
+- **AES** wird im CBC-Modus mit zufälligen IVs (Initialisierungsvektoren) verwendet, um die Sicherheit zu erhöhen.
+- Die Schlüsseldaten werden mit `flutter_secure_storage` sicher auf dem Gerät gespeichert.
+
+Dieses Paket ermöglicht die einfache Integration von Verschlüsselung in Ihre Flutter-Anwendung und bietet Schutz für sensible Informationen.

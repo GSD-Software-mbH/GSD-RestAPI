@@ -1,0 +1,15 @@
+dartdoc:
+  # Pfad zu einem Ordner, in dem die Dokumentation generiert wird
+  output: doc/api
+
+  # Beinhaltet dokumentationsfreie Member in der Ausgabe
+  include-untagged: false
+
+  # Seitenüberschrift für die generierte Dokumentation
+  headerText: "Projekt-Dokumentation für Flutter Encryption"
+
+  # Bestimmt, ob der Quellcode von Dateien verlinkt werden soll
+  link-to-source: true
+
+  # Dokumentation für private Symbole anzeigen (nur für Entwicklungszwecke empfohlen)
+  show-private: false
