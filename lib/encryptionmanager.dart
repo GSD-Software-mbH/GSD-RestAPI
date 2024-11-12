@@ -7,17 +7,17 @@ import 'package:encrypt/encrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pointycastle/export.dart';
 
-/// The `EncryptionManager` class handles AES and RSA encryption/decryption.
+/// Die `EncryptionManager`-Klasse verwaltet AES- und RSA-Verschlüsselung und -Entschlüsselung.
 class EncryptionManager {
   static const String _aesKeyStorageKey = 'encryption_key';
   static EncryptionManager? _instance;
 
-  /// Getter for RSA key pair
+  /// Getter für das RSA-Schlüsselpaar
   AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>? get keyRSA {
     return _keyRSA;
   }
 
-  /// Getter for AES key
+  /// Getter für den AES-Schlüssel
   Key? get keyAES {
     return _keyAES;
   }
@@ -26,35 +26,35 @@ class EncryptionManager {
   Key? _keyAES;
   AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>? _keyRSA;
 
-  /// Factory constructor to return singleton instance
+  /// Factory-Konstruktor für die Singleton-Instanz
   factory EncryptionManager() {
     _instance ??= EncryptionManager._init();
     return _instance!;
   }
 
-  /// Private constructor to initialize secure storage
+  /// Privater Konstruktor zur Initialisierung des sicheren Speichers
   EncryptionManager._init() {
     _secureStorage = const FlutterSecureStorage();
   }
 
-  /// Encrypts a given plain text using AES encryption.
-  /// If a key is not provided, the stored AES key is used.
+  /// Verschlüsselt den angegebenen Klartext mit AES-Verschlüsselung.
+  /// Falls kein Schlüssel angegeben wird, wird der gespeicherte AES-Schlüssel verwendet.
   Future<String> encryptAES(String plainText, {Key? key}) async {
-    // Initialize AES key if not provided
+    // Initialisiert den AES-Schlüssel, falls nicht vorhanden
     if (key == null) await initializeAESKey();
 
-    // Check if the AES key is available
+    // Überprüft, ob der AES-Schlüssel verfügbar ist
     if (_keyAES == null && key == null) {
       throw Exception('Key is null');
     }
 
     key ??= _keyAES;
 
-    final iv = _generateRandomIV(); // Generate a random IV
-    final encrypter = Encrypter(AES(key!, mode: AESMode.cbc)); // Use AES CBC mode
+    final iv = _generateRandomIV(); // Generiert einen zufälligen IV
+    final encrypter = Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
     final encrypted = encrypter.encrypt(plainText, iv: iv);
 
-    // Combine IV with encrypted data
+    // Kombiniert den IV mit den verschlüsselten Daten
     final result = {
       'iv': iv.base64,
       'data': encrypted.base64,
@@ -62,13 +62,13 @@ class EncryptionManager {
     return jsonEncode(result);
   }
 
-  /// Decrypts AES-encrypted text.
-  /// If a key is not provided, the stored AES key is used.
+  /// Entschlüsselt einen mit AES verschlüsselten Text.
+  /// Falls kein Schlüssel angegeben wird, wird der gespeicherte AES-Schlüssel verwendet.
   Future<String> decryptAES(String encryptedText, {Key? key}) async {
-    // Initialize AES key if not provided
+    // Initialisiert den AES-Schlüssel, falls nicht vorhanden
     if (key == null) await initializeAESKey();
 
-    // Check if the AES key is available
+    // Überprüft, ob der AES-Schlüssel verfügbar ist
     if (_keyAES == null && key == null) {
       throw Exception('Key is null');
     }
@@ -78,23 +78,23 @@ class EncryptionManager {
     try {
       final Map<String, dynamic> decoded = jsonDecode(encryptedText);
       final iv = IV.fromBase64(decoded['iv']);
-      final encrypter = Encrypter(AES(key!, mode: AESMode.cbc)); // Use AES CBC mode
+      final encrypter = Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
       final decrypted = encrypter.decrypt(Encrypted.fromBase64(decoded['data']), iv: iv);
 
       return decrypted;
     } catch (e) {
-      // Error handling and logging
+      // Fehlerbehandlung und Logging
       throw Exception('Encryption error: \$e');
     }
   }
 
-  /// Decrypts RSA-encrypted text.
-  /// If a private key is not provided, the stored RSA private key is used.
+  /// Entschlüsselt einen mit RSA verschlüsselten Text.
+  /// Falls kein privater Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
   Future<String> decryptRSA(String encryptedText, {RSAPrivateKey? privateKey}) async {
-    // Initialize RSA key pair if not provided
+    // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
     if (privateKey == null) await initializeRSAKeyPair();
 
-    // Check if the RSA private key is available
+    // Überprüft, ob der RSA-Schlüssel verfügbar ist
     if (_keyRSA == null && privateKey == null) {
       throw Exception('Key is null');
     }
@@ -111,13 +111,13 @@ class EncryptionManager {
     return decryptedString;
   }
 
-  /// Encrypts plain text using RSA encryption.
-  /// If a public key is not provided, the stored RSA public key is used.
+  /// Verschlüsselt einen Klartext mit RSA-Verschlüsselung.
+  /// Falls kein öffentlicher Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
   Future<String> encryptRSA(String plainText, {RSAPublicKey? publicKey}) async {
-    // Initialize RSA key pair if not provided
+    // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
     if (publicKey == null) await initializeRSAKeyPair();
 
-    // Check if the RSA public key is available
+    // Überprüft, ob der RSA-Schlüssel verfügbar ist
     if (_keyRSA == null && publicKey == null) {
       throw Exception('Key is null');
     }
@@ -130,7 +130,7 @@ class EncryptionManager {
     return base64.encode(encryptedData);
   }
 
-  /// Initializes RSA key pair with a given bit length (default is 2048).
+  /// Initialisiert das RSA-Schlüsselpaar mit einer angegebenen Bit-Länge (Standard ist 2048).
   Future<void> initializeRSAKeyPair({int bitLength = 2048}) async {
     if (_keyRSA != null) {
       return;
@@ -138,7 +138,7 @@ class EncryptionManager {
 
     final secureRandom = FortunaRandom();
 
-    // Seed the random number generator
+    // Initialisiert den Zufallszahlengenerator
     final seedSource = Random.secure();
     final seeds = List<int>.generate(32, (_) => seedSource.nextInt(255));
     secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
@@ -154,7 +154,7 @@ class EncryptionManager {
     _keyRSA = AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
   }
 
-  /// Initializes AES key by generating a new one or retrieving from storage.
+  /// Initialisiert den AES-Schlüssel durch Erzeugen eines neuen Schlüssels oder durch Abrufen aus dem Speicher.
   Future<void> initializeAESKey() async {
     if (_keyAES != null) {
       return;
@@ -163,26 +163,26 @@ class EncryptionManager {
     String? storedKey = await _secureStorage.read(key: _aesKeyStorageKey);
 
     if (storedKey == null) {
-      // Generate a new key if not stored
+      // Generiert einen neuen Schlüssel, falls keiner gespeichert ist
       final secureRandom = Random.secure();
-      final keyBytes = List<int>.generate(32, (_) => secureRandom.nextInt(256)); // 256-bit AES key
+      final keyBytes = List<int>.generate(32, (_) => secureRandom.nextInt(256)); // 256-Bit-AES-Schlüssel
       storedKey = base64UrlEncode(keyBytes);
 
       await _secureStorage.write(key: _aesKeyStorageKey, value: storedKey);
     }
 
-    // Set the retrieved or newly generated key
+    // Setzt den abgerufenen oder neu generierten Schlüssel
     _keyAES = Key.fromBase64(storedKey);
   }
 
-  /// Generates a secure, random IV for each encryption.
+  /// Generiert einen sicheren, zufälligen IV für jede Verschlüsselung.
   IV _generateRandomIV() {
     final secureRandom = Random.secure();
     final ivBytes = List<int>.generate(16, (_) => secureRandom.nextInt(256));
     return IV(Uint8List.fromList(ivBytes));
   }
 
-  /// Helper function to process data in blocks (for RSA encryption/decryption).
+  /// Hilfsfunktion zur Blockweise-Verarbeitung von Daten (für RSA-Verschlüsselung/Entschlüsselung).
   Uint8List _processInBlocks(AsymmetricBlockCipher engine, Uint8List input) {
     final numBlocks = (input.length / engine.inputBlockSize).ceil();
     final output = BytesBuilder();
