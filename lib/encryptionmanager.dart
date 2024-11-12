@@ -84,7 +84,7 @@ class EncryptionManager {
       return decrypted;
     } catch (e) {
       // Fehlerbehandlung und Logging
-      throw Exception('Encryption error: \$e');
+      throw Exception('Encryption error: $e');
     }
   }
 
