@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:encryption/encryptionmanager.dart';
+import 'package:encryption/encryptionoptions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
@@ -51,6 +52,15 @@ void main() {
       expect(encryptionManager.keyRSA, isNotNull);
       expect(encryptionManager.keyRSA!.publicKey, isNotNull);
       expect(encryptionManager.keyRSA!.privateKey, isNotNull);
+    });
+  });
+
+  group('RSA Key initialization from Filepaths', () {
+    test('RSA key pair should be initialized from Filepaths', () async {
+      EncryptionManager privateEncryptionManager = EncryptionManager.init(EncryptionOptions(rsaPrivateKeyFilePath: "cert\\encryption.pem", rsaPublicKeyFilePath: "cert\\encryption-pub.pem"));
+      expect(privateEncryptionManager.keyRSA, isNotNull);
+      expect(privateEncryptionManager.keyRSA!.publicKey, isNotNull);
+      expect(privateEncryptionManager.keyRSA!.privateKey, isNotNull);
     });
   });
 }

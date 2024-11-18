@@ -8,7 +8,9 @@ extension StringExtensions on String {
   RSAPublicKey parsePublicKeyFromPem() {
     // Entferne die PEM-Header und -Footer und dekodiere den Base64-PEM-Block
     final pemLines = split('\n');
-    final base64String = pemLines.where((line) => line.isNotEmpty && !line.startsWith('---')).join();
+    final base64String = pemLines
+        .where((line) => line.isNotEmpty && !line.startsWith('---'))
+        .join();
     final bytes = base64.decode(base64String);
 
     // Parsen der ASN.1-Struktur
@@ -30,11 +32,53 @@ extension StringExtensions on String {
     final ASN1Integer exponentASN1 = publicKeySeq.elements![1] as ASN1Integer;
 
     // Konvertiere Modulus und Exponent in BigInt
-    final modulusBigInt = BigInt.parse(modulusASN1.valueBytes!.bytesToHex(), radix: 16);
-    final exponentBigInt = BigInt.parse(exponentASN1.valueBytes!.bytesToHex(), radix: 16);
+    final modulusBigInt =
+        BigInt.parse(modulusASN1.valueBytes!.bytesToHex(), radix: 16);
+    final exponentBigInt =
+        BigInt.parse(exponentASN1.valueBytes!.bytesToHex(), radix: 16);
 
     // Erstelle den `RSAPublicKey`
     return RSAPublicKey(modulusBigInt, exponentBigInt);
+  }
+
+  /// Funktion zum Parsen eines privaten Schlüssels aus dem PEM-Format und Rückgabe als `RSAPrivateKey`
+  RSAPrivateKey parsePrivateKeyFromPem() {
+    // Entferne die PEM-Header und -Footer und dekodiere den Base64-PEM-Block
+    final pemLines = split('\n');
+    final base64String = pemLines
+        .where((line) => line.isNotEmpty && !line.startsWith('---'))
+        .join();
+    final bytes = base64.decode(base64String);
+
+    // Parsen der ASN.1-Struktur
+    final asn1Parser = ASN1Parser(bytes);
+    final topLevelSeq = asn1Parser.nextObject() as ASN1Sequence;
+
+    // PKCS#8-Struktur: Extrahiere den privaten Schlüssel aus dem OctetString
+    final privateKeyOctetString = topLevelSeq.elements!.last as ASN1OctetString;
+    final privateKeyBytes = privateKeyOctetString.octets;
+    final privateKeyParser = ASN1Parser(privateKeyBytes);
+    final privateKeySeq = privateKeyParser.nextObject() as ASN1Sequence;
+
+    // Extrahiere die PKCS#1-Schlüsselparameter
+    final modulusASN1 = privateKeySeq.elements![1] as ASN1Integer; // n
+    final privateExponentASN1 = privateKeySeq.elements![3] as ASN1Integer; // d
+    final prime1ASN1 = privateKeySeq.elements![4] as ASN1Integer; // p
+    final prime2ASN1 = privateKeySeq.elements![5] as ASN1Integer; // q
+
+    // Konvertiere die Werte in BigInt
+    final modulus = _bytesToBigInt(modulusASN1.valueBytes!);
+    final privateExponent = _bytesToBigInt(privateExponentASN1.valueBytes!);
+    final prime1 = _bytesToBigInt(prime1ASN1.valueBytes!);
+    final prime2 = _bytesToBigInt(prime2ASN1.valueBytes!);
+
+    // Erstelle den `RSAPrivateKey`
+    return RSAPrivateKey(modulus, privateExponent, prime1, prime2);
+  }
+
+  /// Hilfsfunktion: Konvertiert eine Liste von Bytes in BigInt
+  BigInt _bytesToBigInt(Uint8List bytes) {
+    return BigInt.parse(bytes.map((byte) => byte.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
   }
 }
 
