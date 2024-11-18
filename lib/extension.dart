@@ -10,7 +10,7 @@ extension StringExtensions on String {
     final pemLines = split('\n');
     final base64String = pemLines
         .where((line) => line.isNotEmpty && !line.startsWith('---'))
-        .join();
+        .join().replaceAll(RegExp(r'\s'), '');
     final bytes = base64.decode(base64String);
 
     // Parsen der ASN.1-Struktur
@@ -47,7 +47,7 @@ extension StringExtensions on String {
     final pemLines = split('\n');
     final base64String = pemLines
         .where((line) => line.isNotEmpty && !line.startsWith('---'))
-        .join();
+        .join().replaceAll(RegExp(r'\s'), '');
     final bytes = base64.decode(base64String);
 
     // Parsen der ASN.1-Struktur
