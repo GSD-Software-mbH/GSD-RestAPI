@@ -1,9 +1,12 @@
 library encryption;
 
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart';
+import 'package:encryption/encryptionoptions.dart';
+import 'package:encryption/extension.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pointycastle/export.dart';
 
@@ -32,9 +35,33 @@ class EncryptionManager {
     return _instance!;
   }
 
+  factory EncryptionManager.init(EncryptionOptions encryptionOptions) {
+    _instance = EncryptionManager._init(encryptionOptions: encryptionOptions);
+    return _instance!;
+  }
+
   /// Privater Konstruktor zur Initialisierung des sicheren Speichers
-  EncryptionManager._init() {
+  EncryptionManager._init({EncryptionOptions? encryptionOptions}) {
     _secureStorage = const FlutterSecureStorage();
+
+    if(encryptionOptions != null) {
+      if(encryptionOptions.aesKeyBytes.isNotEmpty) {
+        _keyAES = generateAESKey(encryptionOptions.aesKeyBytes);
+      }
+
+      File rsaPublicKeyFile = File(encryptionOptions.rsaPublicKeyFilePath);
+      File rsaPrivateKeyFile = File(encryptionOptions.rsaPrivateKeyFilePath);
+
+      if(rsaPublicKeyFile.existsSync() && rsaPrivateKeyFile.existsSync()) {
+        String rsaPublicKeyPEM = rsaPublicKeyFile.readAsStringSync();
+        String rsaPrivateKeyPEM = rsaPrivateKeyFile.readAsStringSync();
+
+        RSAPublicKey rsaPublicKey = rsaPublicKeyPEM.parsePublicKeyFromPem();
+        RSAPrivateKey rsaPrivateKey = rsaPrivateKeyPEM.parsePrivateKeyFromPem();
+
+        _keyRSA = AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(rsaPublicKey, rsaPrivateKey);
+      }
+    }
   }
 
   /// Verschlüsselt den angegebenen Klartext mit AES-Verschlüsselung.
