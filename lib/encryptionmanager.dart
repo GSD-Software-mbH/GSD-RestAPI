@@ -7,8 +7,10 @@ import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart';
 import 'package:encryption/encryptionoptions.dart';
 import 'package:encryption/extension.dart';
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pointycastle/export.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 /// Die `EncryptionManager`-Klasse verwaltet AES- und RSA-Verschlüsselung und -Entschlüsselung.
 class EncryptionManager {
@@ -44,23 +46,39 @@ class EncryptionManager {
   EncryptionManager._init({EncryptionOptions? encryptionOptions}) {
     _secureStorage = const FlutterSecureStorage();
 
-    if(encryptionOptions != null) {
-      if(encryptionOptions.aesKeyBytes.isNotEmpty) {
-        _keyAES = generateAESKey(encryptionOptions.aesKeyBytes);
-      }
+    if (encryptionOptions != null) {
+      _init(encryptionOptions);
+    }
+  }
 
-      File rsaPublicKeyFile = File(encryptionOptions.rsaPublicKeyFilePath);
-      File rsaPrivateKeyFile = File(encryptionOptions.rsaPrivateKeyFilePath);
+  void _init(EncryptionOptions encryptionOptions) async {
+    if (encryptionOptions.aesKeyBytes.isNotEmpty) {
+      _keyAES = generateAESKey(encryptionOptions.aesKeyBytes);
+    }
 
-      if(rsaPublicKeyFile.existsSync() && rsaPrivateKeyFile.existsSync()) {
-        String rsaPublicKeyPEM = rsaPublicKeyFile.readAsStringSync();
-        String rsaPrivateKeyPEM = rsaPrivateKeyFile.readAsStringSync();
+    File rsaPublicKeyFile = File(encryptionOptions.rsaPublicKeyFilePath);
+    File rsaPrivateKeyFile = File(encryptionOptions.rsaPrivateKeyFilePath);
+    String rsaPublicKeyPEM = "";
+    String rsaPrivateKeyPEM = "";
 
-        RSAPublicKey rsaPublicKey = rsaPublicKeyPEM.parsePublicKeyFromPem();
-        RSAPrivateKey rsaPrivateKey = rsaPrivateKeyPEM.parsePrivateKeyFromPem();
+    if (!foundation.kIsWeb &&
+        rsaPublicKeyFile.existsSync() &&
+        rsaPrivateKeyFile.existsSync()) {
+      rsaPublicKeyPEM = rsaPublicKeyFile.readAsStringSync();
+      rsaPrivateKeyPEM = rsaPrivateKeyFile.readAsStringSync();
+    } else {
+      rsaPublicKeyPEM =
+          await rootBundle.loadString(encryptionOptions.rsaPublicKeyFilePath);
+      rsaPrivateKeyPEM =
+          await rootBundle.loadString(encryptionOptions.rsaPrivateKeyFilePath);
+    }
 
-        _keyRSA = AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(rsaPublicKey, rsaPrivateKey);
-      }
+    if (rsaPublicKeyPEM.isNotEmpty && rsaPrivateKeyPEM.isNotEmpty) {
+      RSAPublicKey rsaPublicKey = rsaPublicKeyPEM.parsePublicKeyFromPem();
+      RSAPrivateKey rsaPrivateKey = rsaPrivateKeyPEM.parsePrivateKeyFromPem();
+
+      _keyRSA = AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(
+          rsaPublicKey, rsaPrivateKey);
     }
   }
 
