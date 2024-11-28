@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart';
 import 'package:encryption/encryptionoptions.dart';
 import 'package:encryption/extension.dart';
+import 'package:encryption/web/webasymmetrickeypair.dart';
 import 'package:encryption/web/webrsaencryptionmanagerdummy.dart' if (dart.library.html) 'package:encryption/web/webrsaencryptionmanager.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -23,6 +24,10 @@ class EncryptionManager {
     return _keyRSA;
   }
 
+  WebAsymmetricKeyPair? get webKeyRSA {
+    return _webKeyRSA;
+  }
+
   /// Getter für den AES-Schlüssel
   Key? get keyAES {
     return _keyAES;
@@ -31,6 +36,7 @@ class EncryptionManager {
   late FlutterSecureStorage _secureStorage;
   Key? _keyAES;
   AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>? _keyRSA;
+  WebAsymmetricKeyPair? _webKeyRSA;
 
   /// Factory-Konstruktor für die Singleton-Instanz
   factory EncryptionManager() {
@@ -136,24 +142,28 @@ class EncryptionManager {
 
   /// Entschlüsselt einen mit RSA verschlüsselten Text.
   /// Falls kein privater Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
-  Future<String> decryptRSA(String encryptedText, {RSAPrivateKey? privateKey}) async {
+  Future<String> decryptRSA(String encryptedText, {RSAPrivateKey? privateKey, dynamic webPrivateKey}) async {
     // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
-    if (privateKey == null) await initializeRSAKeyPair();
+    if (privateKey == null || (foundation.kIsWeb && webPrivateKey == null)) await initializeRSAKeyPair();
 
     // Überprüft, ob der RSA-Schlüssel verfügbar ist
     if (_keyRSA == null && privateKey == null) {
       throw Exception('Key is null');
     }
 
-    privateKey ??= _keyRSA!.privateKey;
+    if(foundation.kIsWeb) {
+      webPrivateKey ??= _webKeyRSA!.privateKey;
+    } else {
+      privateKey ??= _keyRSA!.privateKey;
+    }
 
     final encryptedBytes = base64Decode(encryptedText);
 
     if(foundation.kIsWeb) {
-      return WebRSAEncryptionManager.decryptData(privateKey, encryptedBytes);
+      return WebRSAEncryptionManager.decryptData(webPrivateKey, encryptedBytes);
     }
 
-    final decryptor = OAEPEncoding(RSAEngine())..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
+    final decryptor = OAEPEncoding(RSAEngine())..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey!));
     final decryptedBytes = _processInBlocks(decryptor, encryptedBytes);
 
     final decryptedString = utf8.decode(decryptedBytes);
@@ -163,23 +173,27 @@ class EncryptionManager {
 
   /// Verschlüsselt einen Klartext mit RSA-Verschlüsselung.
   /// Falls kein öffentlicher Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
-  Future<String> encryptRSA(String plainText, {RSAPublicKey? publicKey}) async {
+  Future<String> encryptRSA(String plainText, {RSAPublicKey? publicKey, dynamic webPublicKey}) async {
     // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
-    if (publicKey == null) await initializeRSAKeyPair();
+    if (publicKey == null || (foundation.kIsWeb && webPublicKey == null)) await initializeRSAKeyPair();
 
     // Überprüft, ob der RSA-Schlüssel verfügbar ist
     if (_keyRSA == null && publicKey == null) {
       throw Exception('Key is null');
     }
 
-    publicKey ??= _keyRSA!.publicKey;
+    if(foundation.kIsWeb) {
+      webPublicKey ??= _webKeyRSA!.publicKey;
+    } else {
+      publicKey ??= _keyRSA!.publicKey;
+    }
     
     Uint8List encryptedData;
 
     if(foundation.kIsWeb) {
-      encryptedData = await WebRSAEncryptionManager.encryptData(publicKey, plainText);
+      encryptedData = await WebRSAEncryptionManager.encryptData(webPublicKey, plainText);
     } else {
-      final encryptor = OAEPEncoding(RSAEngine())..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
+      final encryptor = OAEPEncoding(RSAEngine())..init(true, PublicKeyParameter<RSAPublicKey>(publicKey!));
       encryptedData = _processInBlocks(encryptor, Uint8List.fromList(utf8.encode(plainText)));
     }
 
@@ -192,11 +206,8 @@ class EncryptionManager {
       return;
     }
 
-    RSAPublicKey publicKey;
-    RSAPrivateKey privateKey;
-
     if(foundation.kIsWeb) {
-      _keyRSA = await WebRSAEncryptionManager.generateRSAKeys(bitLength: bitLength);
+      _webKeyRSA = await WebRSAEncryptionManager.generateRSAKeys(bitLength: bitLength);
       return;
     }
 
@@ -212,8 +223,8 @@ class EncryptionManager {
     final keyGenerator = RSAKeyGenerator()..init(params);
 
     final pair = keyGenerator.generateKeyPair();
-    publicKey = pair.publicKey as RSAPublicKey;
-    privateKey = pair.privateKey as RSAPrivateKey;
+    final publicKey = pair.publicKey as RSAPublicKey;
+    final privateKey = pair.privateKey as RSAPrivateKey;
 
     _keyRSA = AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
   }

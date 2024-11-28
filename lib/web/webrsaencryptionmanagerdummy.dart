@@ -1,12 +1,10 @@
 import 'dart:typed_data';
-
-import 'package:pointycastle/export.dart';
+import 'package:encryption/web/webasymmetrickeypair.dart';
 
 class WebRSAEncryptionManager {
   // Schlüssel generieren
-  static Future<AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>> generateRSAKeys({int bitLength = 2048}) async {   
-    return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(
-          RSAPublicKey(BigInt.one, BigInt.one), RSAPrivateKey(BigInt.one, BigInt.one, null, null));
+  static Future<WebAsymmetricKeyPair> generateRSAKeys({int bitLength = 2048}) async {   
+    return WebAsymmetricKeyPair(null, null);
   }
 
   // Daten verschlüsseln
