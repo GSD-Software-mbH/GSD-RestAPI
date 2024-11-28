@@ -14,7 +14,7 @@ external dynamic get subtle;
 
 class WebRSAKeyGenerator {
   // Schlüssel generieren
-  static Future<AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>> generateRSAKeys({int bitLength = 2048}) async {
+  static Future<AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>> generateRSAKeys({int bitLength = 2048}) async {   
     final options = GenerateKeyOptions(
       name: 'RSA-OAEP',
       modulusLength: bitLength,
