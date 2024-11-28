@@ -5,6 +5,7 @@ import 'dart:js_util' as js_util;
 import 'package:encryption/web/webasymmetrickeypair.dart';
 import 'package:encryption/web/webgeneratekeyoptions.dart';
 import 'package:encryption/web/webhashalgorithm.dart';
+import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
 
 // Zugriff auf `window.crypto.subtle` in JavaScript
@@ -38,26 +39,30 @@ class WebRSAEncryptionManager {
 
   // Daten verschlüsseln
   static Future<Uint8List> encryptData(dynamic publicKey, String data) async {
+    final algorithm = {'name': 'RSA-OAEP'};
+    debugPrint('Public Key: $publicKey');
     final encryptedData = await js_util.promiseToFuture(
       js_util.callMethod(subtle, 'encrypt', [
-        {'name': 'RSA-OAEP'},
-        publicKey,
-        Uint8List.fromList(utf8.encode(data)),
+        algorithm, // Algorithmus
+        publicKey, // Schlüssel
+        Uint8List.fromList(utf8.encode(data)), // Daten
       ]),
     );
-    return Uint8List.fromList(encryptedData as List<int>);
+    return Uint8List.view((encryptedData as ByteBuffer));
   }
 
   // Daten entschlüsseln
   static Future<String> decryptData(
       dynamic privateKey, Uint8List encryptedData) async {
+    final algorithm = {'name': 'RSA-OAEP'};
+    debugPrint('Private Key: $privateKey');
     final decryptedData = await js_util.promiseToFuture(
       js_util.callMethod(subtle, 'decrypt', [
-        {'name': 'RSA-OAEP'},
+        algorithm,
         privateKey,
         encryptedData,
       ]),
     );
-    return utf8.decode(Uint8List.fromList(decryptedData as List<int>));
+    return utf8.decode(Uint8List.view((decryptedData as ByteBuffer)));
   }
 }
