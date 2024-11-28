@@ -150,62 +150,66 @@ class WebRSAEncryptionManager {
   }
 
   static Uint8List _encodePublicKeyToSPKI(RSAPublicKey publicKey) {
-    final modulusBytes = publicKey.modulus!;
-    final exponentBytes = publicKey.publicExponent!;
-
-    // ASN.1 Struktur für SPKI
-    final spki = ASN1Sequence();
+    // Erstelle die ASN.1-Sequenz für den Algorithmus (RSA-OAEP)
     final algorithm = ASN1Sequence();
-    algorithm.add(ASN1ObjectIdentifier.fromName('rsaEncryption'));
+    algorithm
+        .add(ASN1ObjectIdentifier.fromName('rsaEncryption')); // OID für RSA
     algorithm.add(ASN1Null());
-    spki.add(algorithm);
 
-    final subjectPublicKey = ASN1BitString();
-    final subjectSequence = ASN1Sequence();
-    subjectSequence.add(ASN1Integer(modulusBytes));
-    subjectSequence.add(ASN1Integer(exponentBytes));
-    subjectPublicKey.valueBytes = subjectSequence.encodedBytes;
-    spki.add(subjectPublicKey);
+    // Erstelle die ASN.1-Sequenz für den Public Key (Modulus, Exponent)
+    final publicKeySequence = ASN1Sequence();
+    publicKeySequence.add(ASN1Integer(publicKey.modulus!)); // Modulus
+    publicKeySequence
+        .add(ASN1Integer(publicKey.publicExponent!)); // Public Exponent
 
-    return spki.encodedBytes!;
+    // Verpacke die Public Key-Sequenz in einem BitString
+    final publicKeyBitString =
+        ASN1BitString(stringValues: publicKeySequence.encodedBytes);
+
+    // Kombiniere Algorithmus und Public Key in einer SPKI-Sequenz
+    final spkiSequence = ASN1Sequence();
+    spkiSequence.add(algorithm);
+    spkiSequence.add(publicKeyBitString);
+
+    // Gebe die codierten SPKI-Daten zurück
+    return spkiSequence.encodedBytes!;
   }
 
   static Uint8List _encodePrivateKeyToPKCS8(RSAPrivateKey privateKey) {
-    final modulusBytes = privateKey.modulus!;
-    final publicExponentBytes = privateKey.publicExponent!;
-    final privateExponentBytes = privateKey.privateExponent!;
-    final prime1Bytes = privateKey.p!;
-    final prime2Bytes = privateKey.q!;
-    final exponent1Bytes = 
-        privateKey.privateExponent! % (privateKey.p! - BigInt.one);
-    final exponent2Bytes = 
-        privateKey.privateExponent! % (privateKey.q! - BigInt.one);
-    final coefficientBytes =
-        privateKey.q!.modInverse(privateKey.p!);
+    // ASN.1-Sequenz für den Algorithmus (RSA-OAEP)
+    final algorithm = ASN1Sequence();
+    algorithm
+        .add(ASN1ObjectIdentifier.fromName('rsaEncryption')); // OID für RSA
+    algorithm.add(ASN1Null());
 
-    // ASN.1 Struktur für PKCS#8
-    final pkcs8 = ASN1Sequence();
-    final version = ASN1Integer(BigInt.from(0));
-    final privateKeyAlgorithm = ASN1Sequence();
-    privateKeyAlgorithm.add(ASN1ObjectIdentifier.fromName('rsaEncryption'));
-    privateKeyAlgorithm.add(ASN1Null());
+    // ASN.1-Sequenz für den Private Key (Modulus, Exponent, CRT-Daten)
     final privateKeySequence = ASN1Sequence();
     privateKeySequence.add(ASN1Integer(BigInt.from(0))); // Version
-    privateKeySequence.add(ASN1Integer(modulusBytes));
-    privateKeySequence.add(ASN1Integer(publicExponentBytes));
-    privateKeySequence.add(ASN1Integer(privateExponentBytes));
-    privateKeySequence.add(ASN1Integer(prime1Bytes));
-    privateKeySequence.add(ASN1Integer(prime2Bytes));
-    privateKeySequence.add(ASN1Integer(exponent1Bytes));
-    privateKeySequence.add(ASN1Integer(exponent2Bytes));
-    privateKeySequence.add(ASN1Integer(coefficientBytes));
+    privateKeySequence.add(ASN1Integer(privateKey.modulus!)); // Modulus
+    privateKeySequence
+        .add(ASN1Integer(privateKey.publicExponent!)); // Public Exponent
+    privateKeySequence
+        .add(ASN1Integer(privateKey.privateExponent!)); // Private Exponent
+    privateKeySequence.add(ASN1Integer(privateKey.p!)); // Prime1 (p)
+    privateKeySequence.add(ASN1Integer(privateKey.q!)); // Prime2 (q)
+    privateKeySequence.add(ASN1Integer(privateKey.privateExponent! %
+        (privateKey.p! - BigInt.one))); // d mod (p-1)
+    privateKeySequence.add(ASN1Integer(privateKey.privateExponent! %
+        (privateKey.q! - BigInt.one))); // d mod (q-1)
+    privateKeySequence.add(ASN1Integer(
+        privateKey.q!.modInverse(privateKey.p!))); // qInv (q^-1 mod p)
+
+    // Verpacke die Private Key-Sequenz in einem Octet String
     final privateKeyOctetString =
         ASN1OctetString(octets: privateKeySequence.encodedBytes);
 
-    pkcs8.add(version);
-    pkcs8.add(privateKeyAlgorithm);
-    pkcs8.add(privateKeyOctetString);
+    // Kombiniere Algorithmus und Private Key in einer PKCS#8-Sequenz
+    final pkcs8Sequence = ASN1Sequence();
+    pkcs8Sequence.add(ASN1Integer(BigInt.from(0))); // Version
+    pkcs8Sequence.add(algorithm);
+    pkcs8Sequence.add(privateKeyOctetString);
 
-    return pkcs8.encodedBytes!;
+    // Gebe die codierten PKCS#8-Daten zurück
+    return pkcs8Sequence.encodedBytes!;
   }
 }
