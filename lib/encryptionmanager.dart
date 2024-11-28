@@ -7,8 +7,8 @@ import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart';
 import 'package:encryption/encryptionoptions.dart';
 import 'package:encryption/extension.dart';
-import 'package:encryption/web/webasymmetrickeypair.dart';
-import 'package:encryption/web/webrsaencryptionmanagerdummy.dart' if (dart.library.html) 'package:encryption/web/webrsaencryptionmanager.dart';
+import 'package:encryption/web/webrsaencryptionmanagerdummy.dart'
+    if (dart.library.html) 'package:encryption/web/webrsaencryptionmanagerdummy.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pointycastle/export.dart';
@@ -24,10 +24,6 @@ class EncryptionManager {
     return _keyRSA;
   }
 
-  WebAsymmetricKeyPair? get webKeyRSA {
-    return _webKeyRSA;
-  }
-
   /// Getter für den AES-Schlüssel
   Key? get keyAES {
     return _keyAES;
@@ -36,7 +32,6 @@ class EncryptionManager {
   late FlutterSecureStorage _secureStorage;
   Key? _keyAES;
   AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>? _keyRSA;
-  WebAsymmetricKeyPair? _webKeyRSA;
 
   /// Factory-Konstruktor für die Singleton-Instanz
   factory EncryptionManager() {
@@ -103,7 +98,8 @@ class EncryptionManager {
     key ??= _keyAES;
 
     final iv = _generateRandomIV(); // Generiert einen zufälligen IV
-    final encrypter = Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
+    final encrypter =
+        Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
     final encrypted = encrypter.encrypt(plainText, iv: iv);
 
     // Kombiniert den IV mit den verschlüsselten Daten
@@ -130,8 +126,10 @@ class EncryptionManager {
     try {
       final Map<String, dynamic> decoded = jsonDecode(encryptedText);
       final iv = IV.fromBase64(decoded['iv']);
-      final encrypter = Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
-      final decrypted = encrypter.decrypt(Encrypted.fromBase64(decoded['data']), iv: iv);
+      final encrypter =
+          Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
+      final decrypted =
+          encrypter.decrypt(Encrypted.fromBase64(decoded['data']), iv: iv);
 
       return decrypted;
     } catch (e) {
@@ -142,28 +140,22 @@ class EncryptionManager {
 
   /// Entschlüsselt einen mit RSA verschlüsselten Text.
   /// Falls kein privater Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
-  Future<String> decryptRSA(String encryptedText, {RSAPrivateKey? privateKey, dynamic webPrivateKey}) async {
+  Future<String> decryptRSA(String encryptedText,
+      {RSAPrivateKey? privateKey}) async {
     // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
-    if (privateKey == null || (foundation.kIsWeb && webPrivateKey == null)) await initializeRSAKeyPair();
+    if (privateKey == null) await initializeRSAKeyPair();
 
     // Überprüft, ob der RSA-Schlüssel verfügbar ist
     if (_keyRSA == null && privateKey == null) {
       throw Exception('Key is null');
     }
 
-    if(foundation.kIsWeb) {
-      webPrivateKey ??= _webKeyRSA!.privateKey;
-    } else {
-      privateKey ??= _keyRSA!.privateKey;
-    }
+    privateKey ??= _keyRSA!.privateKey;
 
     final encryptedBytes = base64Decode(encryptedText);
 
-    if(foundation.kIsWeb) {
-      return WebRSAEncryptionManager.decryptData(webPrivateKey, encryptedBytes);
-    }
-
-    final decryptor = OAEPEncoding(RSAEngine())..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey!));
+    final decryptor = OAEPEncoding(RSAEngine())
+      ..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
     final decryptedBytes = _processInBlocks(decryptor, encryptedBytes);
 
     final decryptedString = utf8.decode(decryptedBytes);
@@ -173,29 +165,21 @@ class EncryptionManager {
 
   /// Verschlüsselt einen Klartext mit RSA-Verschlüsselung.
   /// Falls kein öffentlicher Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
-  Future<String> encryptRSA(String plainText, {RSAPublicKey? publicKey, dynamic webPublicKey}) async {
+  Future<String> encryptRSA(String plainText, {RSAPublicKey? publicKey}) async {
     // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
-    if (publicKey == null || (foundation.kIsWeb && webPublicKey == null)) await initializeRSAKeyPair();
+    if (publicKey == null) await initializeRSAKeyPair();
 
     // Überprüft, ob der RSA-Schlüssel verfügbar ist
     if (_keyRSA == null && publicKey == null) {
       throw Exception('Key is null');
     }
 
-    if(foundation.kIsWeb) {
-      webPublicKey ??= _webKeyRSA!.publicKey;
-    } else {
-      publicKey ??= _keyRSA!.publicKey;
-    }
-    
-    Uint8List encryptedData;
+    publicKey ??= _keyRSA!.publicKey;
 
-    if(foundation.kIsWeb) {
-      encryptedData = await WebRSAEncryptionManager.encryptData(webPublicKey, plainText);
-    } else {
-      final encryptor = OAEPEncoding(RSAEngine())..init(true, PublicKeyParameter<RSAPublicKey>(publicKey!));
-      encryptedData = _processInBlocks(encryptor, Uint8List.fromList(utf8.encode(plainText)));
-    }
+    final encryptor = OAEPEncoding(RSAEngine())
+      ..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
+    final encryptedData =
+        _processInBlocks(encryptor, Uint8List.fromList(utf8.encode(plainText)));
 
     return base64.encode(encryptedData);
   }
@@ -206,8 +190,12 @@ class EncryptionManager {
       return;
     }
 
-    if(foundation.kIsWeb) {
-      _webKeyRSA = await WebRSAEncryptionManager.generateRSAKeys(bitLength: bitLength);
+    RSAPublicKey publicKey;
+    RSAPrivateKey privateKey;
+
+    if (foundation.kIsWeb) {
+      _keyRSA =
+          await WebRSAEncryptionManager.generateRSAKeys(bitLength: bitLength);
       return;
     }
 
@@ -218,15 +206,17 @@ class EncryptionManager {
     final seeds = List<int>.generate(32, (_) => seedSource.nextInt(255));
     secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
 
-    final rsaParams = RSAKeyGeneratorParameters(BigInt.parse('65537'), bitLength, 64);
+    final rsaParams =
+        RSAKeyGeneratorParameters(BigInt.parse('65537'), bitLength, 64);
     final params = ParametersWithRandom(rsaParams, secureRandom);
     final keyGenerator = RSAKeyGenerator()..init(params);
 
     final pair = keyGenerator.generateKeyPair();
-    final publicKey = pair.publicKey as RSAPublicKey;
-    final privateKey = pair.privateKey as RSAPrivateKey;
+    publicKey = pair.publicKey as RSAPublicKey;
+    privateKey = pair.privateKey as RSAPrivateKey;
 
-    _keyRSA = AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
+    _keyRSA =
+        AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
   }
 
   /// Initialisiert den AES-Schlüssel durch Erzeugen eines neuen Schlüssels oder durch Abrufen aus dem Speicher.
@@ -276,7 +266,6 @@ class EncryptionManager {
     return Key.fromBase64(base64Key);
   }
 
-
   /// Generiert einen sicheren, zufälligen IV für jede Verschlüsselung.
   IV _generateRandomIV() {
     final secureRandom = Random.secure();
@@ -292,7 +281,8 @@ class EncryptionManager {
     for (var i = 0; i < numBlocks; i++) {
       final start = i * engine.inputBlockSize;
       final end = start + engine.inputBlockSize;
-      final chunk = input.sublist(start, end > input.length ? input.length : end);
+      final chunk =
+          input.sublist(start, end > input.length ? input.length : end);
       output.add(engine.process(chunk));
     }
 
