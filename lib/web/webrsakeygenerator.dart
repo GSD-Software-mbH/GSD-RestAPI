@@ -14,10 +14,10 @@ external dynamic get subtle;
 
 class WebRSAKeyGenerator {
   // Schlüssel generieren
-  static Future<AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>> generateRSAKeys() async {
+  static Future<AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>> generateRSAKeys({int bitLength = 2048}) async {
     final options = GenerateKeyOptions(
       name: 'RSA-OAEP',
-      modulusLength: 2048,
+      modulusLength: bitLength,
       publicExponent: Uint8List.fromList([0x01, 0x00, 0x01]),
       hash: HashAlgorithm(name: 'SHA-256'),
     );

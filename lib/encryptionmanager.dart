@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart';
 import 'package:encryption/encryptionoptions.dart';
 import 'package:encryption/extension.dart';
+import 'package:encryption/web/webrsakeygenerator.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pointycastle/export.dart';
@@ -181,6 +182,14 @@ class EncryptionManager {
       return;
     }
 
+    RSAPublicKey publicKey;
+    RSAPrivateKey privateKey;
+
+    if(foundation.kIsWeb) {
+      _keyRSA = await WebRSAKeyGenerator.generateRSAKeys(bitLength: bitLength);
+      return;
+    }
+
     final secureRandom = FortunaRandom();
 
     // Initialisiert den Zufallszahlengenerator
@@ -193,8 +202,8 @@ class EncryptionManager {
     final keyGenerator = RSAKeyGenerator()..init(params);
 
     final pair = keyGenerator.generateKeyPair();
-    final publicKey = pair.publicKey as RSAPublicKey;
-    final privateKey = pair.privateKey as RSAPrivateKey;
+    publicKey = pair.publicKey as RSAPublicKey;
+    privateKey = pair.privateKey as RSAPrivateKey;
 
     _keyRSA = AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
   }
