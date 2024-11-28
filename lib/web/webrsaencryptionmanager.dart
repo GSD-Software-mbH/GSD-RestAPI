@@ -40,8 +40,13 @@ class WebRSAEncryptionManager {
   // Daten verschlüsseln
   static Future<Uint8List> encryptData(dynamic publicKey, String data) async {
     final algorithm = {'name': 'RSA-OAEP'};
-    debugPrint('Public Key: $publicKey');
+
+    // Debugging
     debugPrint('Algorithm: ${jsonEncode(algorithm)}');
+    debugPrint('Public Key: ${js_util.getProperty(publicKey, "type")}');
+    debugPrint('Key usages: ${js_util.getProperty(publicKey, "usages")}');
+    debugPrint('Zu verschlüsselnde Daten: ${utf8.encode(data)}');
+
     final encryptedData = await js_util.promiseToFuture(
       js_util.callMethod(subtle, 'encrypt', [
         algorithm, // Algorithmus
