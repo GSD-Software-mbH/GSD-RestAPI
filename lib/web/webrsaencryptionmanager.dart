@@ -43,9 +43,9 @@ class WebRSAEncryptionManager {
 
     // Debugging
     debugPrint('Algorithm: ${jsonEncode(algorithm)}');
-    debugPrint('Public Key: ${js_util.getProperty(publicKey, "type")}');
-    debugPrint('Key usages: ${js_util.getProperty(publicKey, "usages")}');
-    debugPrint('Zu verschlüsselnde Daten: ${utf8.encode(data)}');
+    debugPrint('Key Algorithm: ${js_util.getProperty(publicKey, "algorithm")}');
+    debugPrint('Key Type: ${js_util.getProperty(publicKey, "type")}');
+    debugPrint('Key Usages: ${js_util.getProperty(publicKey, "usages")}');
 
     final encryptedData = await js_util.promiseToFuture(
       js_util.callMethod(subtle, 'encrypt', [
