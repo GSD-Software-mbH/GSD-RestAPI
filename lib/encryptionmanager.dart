@@ -149,6 +149,10 @@ class EncryptionManager {
 
     final encryptedBytes = base64Decode(encryptedText);
 
+    if(foundation.kIsWeb) {
+      return WebRSAEncryptionManager.decryptData(privateKey, encryptedBytes);
+    }
+
     final decryptor = OAEPEncoding(RSAEngine())..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
     final decryptedBytes = _processInBlocks(decryptor, encryptedBytes);
 
@@ -169,9 +173,15 @@ class EncryptionManager {
     }
 
     publicKey ??= _keyRSA!.publicKey;
+    
+    Uint8List encryptedData;
 
-    final encryptor = OAEPEncoding(RSAEngine())..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
-    final encryptedData = _processInBlocks(encryptor, Uint8List.fromList(utf8.encode(plainText)));
+    if(foundation.kIsWeb) {
+      encryptedData = await WebRSAEncryptionManager.encryptData(publicKey, plainText);
+    } else {
+      final encryptor = OAEPEncoding(RSAEngine())..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
+      encryptedData = _processInBlocks(encryptor, Uint8List.fromList(utf8.encode(plainText)));
+    }
 
     return base64.encode(encryptedData);
   }
@@ -186,7 +196,7 @@ class EncryptionManager {
     RSAPrivateKey privateKey;
 
     if(foundation.kIsWeb) {
-      _keyRSA = await WebRSAKeyGenerator.generateRSAKeys(bitLength: bitLength);
+      _keyRSA = await WebRSAEncryptionManager.generateRSAKeys(bitLength: bitLength);
       return;
     }
 

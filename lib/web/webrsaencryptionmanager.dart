@@ -12,7 +12,7 @@ import 'package:pointycastle/export.dart';
 @JS('window.crypto.subtle')
 external dynamic get subtle;
 
-class WebRSAKeyGenerator {
+class WebRSAEncryptionManager {
   // Schlüssel generieren
   static Future<AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>> generateRSAKeys({int bitLength = 2048}) async {   
     final options = GenerateKeyOptions(
@@ -41,6 +41,30 @@ class WebRSAKeyGenerator {
 
     return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(
           rsaPublicKey, rsaPrivateKey);
+  }
+
+  // Daten verschlüsseln
+  static Future<Uint8List> encryptData(dynamic publicKey, String data) async {
+    final encryptedData = await js_util.promiseToFuture(
+      js_util.callMethod(subtle, 'encrypt', [
+        {'name': 'RSA-OAEP'},
+        publicKey,
+        Uint8List.fromList(utf8.encode(data)),
+      ]),
+    );
+    return Uint8List.fromList(encryptedData as List<int>);
+  }
+
+  // Daten entschlüsseln
+  static Future<String> decryptData(dynamic privateKey, Uint8List encryptedData) async {
+    final decryptedData = await js_util.promiseToFuture(
+      js_util.callMethod(subtle, 'decrypt', [
+        {'name': 'RSA-OAEP'},
+        privateKey,
+        encryptedData,
+      ]),
+    );
+    return utf8.decode(Uint8List.fromList(decryptedData as List<int>));
   }
 
   static Future<String> _exportPublicKey(dynamic publicKey) async {
