@@ -37,7 +37,7 @@ class WebRSAEncryptionManager {
   }
 
   // Daten verschlüsseln
-  Future<Uint8List> encryptData(dynamic publicKey, String data) async {
+  static Future<Uint8List> encryptData(dynamic publicKey, String data) async {
     final encryptedData = await js_util.promiseToFuture(
       js_util.callMethod(subtle, 'encrypt', [
         {'name': 'RSA-OAEP'},
@@ -49,7 +49,7 @@ class WebRSAEncryptionManager {
   }
 
   // Daten entschlüsseln
-  Future<String> decryptData(
+  static Future<String> decryptData(
       dynamic privateKey, Uint8List encryptedData) async {
     final decryptedData = await js_util.promiseToFuture(
       js_util.callMethod(subtle, 'decrypt', [
