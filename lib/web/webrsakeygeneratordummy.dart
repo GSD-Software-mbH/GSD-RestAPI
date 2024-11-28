@@ -1,9 +1,4 @@
-import 'package:js/js.dart';
 import 'package:pointycastle/export.dart';
-
-// Zugriff auf `window.crypto.subtle` in JavaScript
-@JS('window.crypto.subtle')
-external dynamic get subtle;
 
 class WebRSAKeyGenerator {
   // Schlüssel generieren
