@@ -22,7 +22,7 @@ class WebRSAKeyGenerator {
       hash: HashAlgorithm(name: 'SHA-256'),
     );
 
-    dynamic keypair = js_util.promiseToFuture(
+    dynamic keypair = await js_util.promiseToFuture(
       js_util.callMethod(subtle, 'generateKey', [
         options,
         true,
