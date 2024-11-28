@@ -49,8 +49,9 @@ class WebRSAKeyGenerator {
       js_util.callMethod(subtle, 'exportKey', ['spki', publicKey])
     );
 
-    // Base64-kodiere die Binärdaten
-    final base64Key = base64Encode(Uint8List.fromList(spkiKey as List<int>));
+    final spkiKeyBuffer = spkiKey as ByteBuffer; // Typcasting in ByteBuffer
+    final spkiKeyBytes = Uint8List.view(spkiKeyBuffer); // Konvertierung in Uint8List
+    final base64Key = base64Encode(spkiKeyBytes); // Base64-Kodierung
 
     // Füge die PEM-Header und -Footer hinzu
     final pemKey = [
@@ -68,8 +69,9 @@ class WebRSAKeyGenerator {
       js_util.callMethod(subtle, 'exportKey', ['pkcs8', privateKey])
     );
 
-    // Base64-kodiere die Binärdaten
-    final base64Key = base64Encode(Uint8List.fromList(pkcs8Key as List<int>));
+    final pkcs8KeyBuffer = pkcs8Key as ByteBuffer; // Typcasting in ByteBuffer
+    final pkcs8KeyBytes = Uint8List.view(pkcs8KeyBuffer); // Konvertierung in Uint8List
+    final base64Key = base64Encode(pkcs8KeyBytes); // Base64-Kodierung
 
     // Füge die PEM-Header und -Footer hinzu
     final pemKey = [
