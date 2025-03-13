@@ -8,6 +8,7 @@ import 'package:encrypt/encrypt.dart';
 import 'package:encryption/encryptionoptions.dart';
 import 'package:encryption/extension.dart';
 import 'package:flutter/foundation.dart' as foundation;
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pointycastle/export.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -84,7 +85,7 @@ class EncryptionManager {
 
   /// Verschlüsselt den angegebenen Klartext mit AES-Verschlüsselung.
   /// Falls kein Schlüssel angegeben wird, wird der gespeicherte AES-Schlüssel verwendet.
-  Future<String> encryptAES(String plainText, {Key? key}) async {
+  Future<String> encryptAES(String plainText, {Key? key, String? padding = "PKCS7"}) async {
     // Initialisiert den AES-Schlüssel, falls nicht vorhanden
     if (key == null) await initializeAESKey();
 
@@ -96,7 +97,7 @@ class EncryptionManager {
     key ??= _keyAES;
 
     final iv = _generateRandomIV(); // Generiert einen zufälligen IV
-    final encrypter = Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
+    final encrypter = Encrypter(AES(key!, mode: AESMode.cbc, padding: padding)); // Verwendet AES im CBC-Modus
     final encrypted = encrypter.encrypt(plainText, iv: iv);
 
     // Kombiniert den IV mit den verschlüsselten Daten
@@ -109,7 +110,7 @@ class EncryptionManager {
 
   /// Entschlüsselt einen mit AES verschlüsselten Text.
   /// Falls kein Schlüssel angegeben wird, wird der gespeicherte AES-Schlüssel verwendet.
-  Future<String> decryptAES(String encryptedText, {Key? key}) async {
+  Future<String> decryptAES(String encryptedText, {Key? key, String? padding = "PKCS7"}) async {
     // Initialisiert den AES-Schlüssel, falls nicht vorhanden
     if (key == null) await initializeAESKey();
 
@@ -123,7 +124,7 @@ class EncryptionManager {
     try {
       final Map<String, dynamic> decoded = jsonDecode(encryptedText);
       final iv = IV.fromBase64(decoded['iv']);
-      final encrypter = Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
+      final encrypter = Encrypter(AES(key!, mode: AESMode.cbc, padding: padding)); // Verwendet AES im CBC-Modus
       final decrypted = encrypter.decrypt(Encrypted.fromBase64(decoded['data']), iv: iv);
 
       return decrypted;
@@ -145,11 +146,11 @@ class EncryptionManager {
     }
 
     privateKey ??= _keyRSA!.privateKey;
+    
+    final rsaEncrypter = encrypt.Encrypter(encrypt.RSA(privateKey: privateKey, encoding: encrypt.RSAEncoding.OAEP, digest: encrypt.RSADigest.SHA256));
+    final encryptedData = Uint8List.fromList(rsaEncrypter.decryptBytes(encrypt.Encrypted(bytes)));
 
-    final decryptor = OAEPEncoding(RSAEngine())..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
-    final decryptedBytes = decryptor.process(bytes);
-
-    return decryptedBytes;
+    return encryptedData;
   }
 
   /// Verschlüsselt einen Klartext mit RSA-Verschlüsselung.
@@ -165,8 +166,8 @@ class EncryptionManager {
 
     publicKey ??= _keyRSA!.publicKey;
 
-    final encryptor = OAEPEncoding(RSAEngine())..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
-    final encryptedData = encryptor.process(bytes);
+    final rsaEncrypter = encrypt.Encrypter(encrypt.RSA(publicKey: publicKey, encoding: encrypt.RSAEncoding.OAEP, digest: encrypt.RSADigest.SHA256));
+    final encryptedData = rsaEncrypter.encryptBytes(bytes).bytes;
 
     return encryptedData;
   }
