@@ -7,8 +7,6 @@ import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart';
 import 'package:encryption/encryptionoptions.dart';
 import 'package:encryption/extension.dart';
-import 'package:encryption/web/webrsaencryptionmanagerdummy.dart'
-    if (dart.library.html) 'package:encryption/web/webrsaencryptionmanager.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pointycastle/export.dart';
@@ -98,8 +96,7 @@ class EncryptionManager {
     key ??= _keyAES;
 
     final iv = _generateRandomIV(); // Generiert einen zufälligen IV
-    final encrypter =
-        Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
+    final encrypter = Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
     final encrypted = encrypter.encrypt(plainText, iv: iv);
 
     // Kombiniert den IV mit den verschlüsselten Daten
@@ -126,10 +123,8 @@ class EncryptionManager {
     try {
       final Map<String, dynamic> decoded = jsonDecode(encryptedText);
       final iv = IV.fromBase64(decoded['iv']);
-      final encrypter =
-          Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
-      final decrypted =
-          encrypter.decrypt(Encrypted.fromBase64(decoded['data']), iv: iv);
+      final encrypter = Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
+      final decrypted = encrypter.decrypt(Encrypted.fromBase64(decoded['data']), iv: iv);
 
       return decrypted;
     } catch (e) {
@@ -140,8 +135,7 @@ class EncryptionManager {
 
   /// Entschlüsselt einen mit RSA verschlüsselten Text.
   /// Falls kein privater Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
-  Future<String> decryptRSA(String encryptedText,
-      {RSAPrivateKey? privateKey}) async {
+  Future<Uint8List> decryptRSA(Uint8List bytes, {RSAPrivateKey? privateKey}) async {
     // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
     if (privateKey == null) await initializeRSAKeyPair();
 
@@ -152,20 +146,15 @@ class EncryptionManager {
 
     privateKey ??= _keyRSA!.privateKey;
 
-    final encryptedBytes = base64Decode(encryptedText);
+    final decryptor = OAEPEncoding(RSAEngine())..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
+    final decryptedBytes = _processInBlocks(decryptor, bytes);
 
-    final decryptor = OAEPEncoding(RSAEngine())
-      ..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
-    final decryptedBytes = decryptor.process(encryptedBytes);
-
-    final decryptedString = utf8.decode(decryptedBytes);
-
-    return decryptedString;
+    return decryptedBytes;
   }
 
   /// Verschlüsselt einen Klartext mit RSA-Verschlüsselung.
   /// Falls kein öffentlicher Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
-  Future<String> encryptRSA(String plainText, {RSAPublicKey? publicKey}) async {
+  Future<Uint8List> encryptRSA(Uint8List bytes, {RSAPublicKey? publicKey}) async {
     // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
     if (publicKey == null) await initializeRSAKeyPair();
 
@@ -176,25 +165,15 @@ class EncryptionManager {
 
     publicKey ??= _keyRSA!.publicKey;
 
-    final encryptor = OAEPEncoding(RSAEngine())
-      ..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
-    final encryptedData = encryptor.process(Uint8List.fromList(utf8.encode(plainText)));
+    final encryptor = OAEPEncoding(RSAEngine())..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
+    final encryptedData = _processInBlocks(encryptor, bytes);
 
-    return base64.encode(encryptedData);
+    return encryptedData;
   }
 
   /// Initialisiert das RSA-Schlüsselpaar mit einer angegebenen Bit-Länge (Standard ist 2048).
   Future<void> initializeRSAKeyPair({int bitLength = 2048}) async {
     if (_keyRSA != null) {
-      return;
-    }
-
-    RSAPublicKey publicKey;
-    RSAPrivateKey privateKey;
-
-    if (foundation.kIsWeb) {
-      _keyRSA =
-          await WebRSAEncryptionManager.generateRSAKeys(bitLength: bitLength);
       return;
     }
 
@@ -205,17 +184,15 @@ class EncryptionManager {
     final seeds = List<int>.generate(32, (_) => seedSource.nextInt(255));
     secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
 
-    final rsaParams =
-        RSAKeyGeneratorParameters(BigInt.parse('65537'), bitLength, 64);
+    final rsaParams = RSAKeyGeneratorParameters(BigInt.parse('65537'), bitLength, 64);
     final params = ParametersWithRandom(rsaParams, secureRandom);
     final keyGenerator = RSAKeyGenerator()..init(params);
 
     final pair = keyGenerator.generateKeyPair();
-    publicKey = pair.publicKey as RSAPublicKey;
-    privateKey = pair.privateKey as RSAPrivateKey;
+    final publicKey = pair.publicKey as RSAPublicKey;
+    final privateKey = pair.privateKey as RSAPrivateKey;
 
-    _keyRSA =
-        AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
+    _keyRSA = AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
   }
 
   /// Initialisiert den AES-Schlüssel durch Erzeugen eines neuen Schlüssels oder durch Abrufen aus dem Speicher.
@@ -265,10 +242,26 @@ class EncryptionManager {
     return Key.fromBase64(base64Key);
   }
 
+
   /// Generiert einen sicheren, zufälligen IV für jede Verschlüsselung.
   IV _generateRandomIV() {
     final secureRandom = Random.secure();
     final ivBytes = List<int>.generate(16, (_) => secureRandom.nextInt(256));
     return IV(Uint8List.fromList(ivBytes));
+  }
+
+  /// Hilfsfunktion zur Blockweise-Verarbeitung von Daten (für RSA-Verschlüsselung/Entschlüsselung).
+  Uint8List _processInBlocks(AsymmetricBlockCipher engine, Uint8List input) {
+    final numBlocks = (input.length / engine.inputBlockSize).ceil();
+    final output = BytesBuilder();
+
+    for (var i = 0; i < numBlocks; i++) {
+      final start = i * engine.inputBlockSize;
+      final end = start + engine.inputBlockSize;
+      final chunk = input.sublist(start, end > input.length ? input.length : end);
+      output.add(engine.process(chunk));
+    }
+
+    return output.toBytes();
   }
 }
