@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:encryption/encryptionmanager.dart';
 import 'package:encryption/encryptionoptions.dart';
@@ -39,8 +40,8 @@ void main() {
       const plainText = 'Hello RSA Encryption';
       
       await encryptionManager.initializeRSAKeyPair();
-      final encryptedText = await encryptionManager.encryptRSA(plainText);
-      final decryptedText = await encryptionManager.decryptRSA(encryptedText);
+      final encryptedText = await encryptionManager.encryptRSA(Uint8List.fromList(utf8.encode(plainText)));
+      final decryptedText = utf8.decode(await encryptionManager.decryptRSA(encryptedText));
       
       expect(decryptedText, equals(plainText));
     });
