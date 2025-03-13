@@ -85,7 +85,7 @@ class EncryptionManager {
 
   /// Verschlüsselt den angegebenen Klartext mit AES-Verschlüsselung.
   /// Falls kein Schlüssel angegeben wird, wird der gespeicherte AES-Schlüssel verwendet.
-  Future<String> encryptAES(String plainText, {Key? key, String? padding}) async {
+  Future<String> encryptAES(String plainText, {Key? key, String? padding = "PKCS7"}) async {
     // Initialisiert den AES-Schlüssel, falls nicht vorhanden
     if (key == null) await initializeAESKey();
 
@@ -110,7 +110,7 @@ class EncryptionManager {
 
   /// Entschlüsselt einen mit AES verschlüsselten Text.
   /// Falls kein Schlüssel angegeben wird, wird der gespeicherte AES-Schlüssel verwendet.
-  Future<String> decryptAES(String encryptedText, {Key? key, String? padding}) async {
+  Future<String> decryptAES(String encryptedText, {Key? key, String? padding = "PKCS7"}) async {
     // Initialisiert den AES-Schlüssel, falls nicht vorhanden
     if (key == null) await initializeAESKey();
 
