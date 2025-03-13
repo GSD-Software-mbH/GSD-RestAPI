@@ -156,7 +156,7 @@ class EncryptionManager {
 
     final decryptor = OAEPEncoding(RSAEngine())
       ..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
-    final decryptedBytes = _processInBlocks(decryptor, encryptedBytes);
+    final decryptedBytes = decryptor.process(encryptedBytes);
 
     final decryptedString = utf8.decode(decryptedBytes);
 
@@ -178,8 +178,7 @@ class EncryptionManager {
 
     final encryptor = OAEPEncoding(RSAEngine())
       ..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
-    final encryptedData =
-        _processInBlocks(encryptor, Uint8List.fromList(utf8.encode(plainText)));
+    final encryptedData = encryptor.process(Uint8List.fromList(utf8.encode(plainText)));
 
     return base64.encode(encryptedData);
   }
@@ -271,21 +270,5 @@ class EncryptionManager {
     final secureRandom = Random.secure();
     final ivBytes = List<int>.generate(16, (_) => secureRandom.nextInt(256));
     return IV(Uint8List.fromList(ivBytes));
-  }
-
-  /// Hilfsfunktion zur Blockweise-Verarbeitung von Daten (für RSA-Verschlüsselung/Entschlüsselung).
-  Uint8List _processInBlocks(AsymmetricBlockCipher engine, Uint8List input) {
-    final numBlocks = (input.length / engine.inputBlockSize).ceil();
-    final output = BytesBuilder();
-
-    for (var i = 0; i < numBlocks; i++) {
-      final start = i * engine.inputBlockSize;
-      final end = start + engine.inputBlockSize;
-      final chunk =
-          input.sublist(start, end > input.length ? input.length : end);
-      output.add(engine.process(chunk));
-    }
-
-    return output.toBytes();
   }
 }
