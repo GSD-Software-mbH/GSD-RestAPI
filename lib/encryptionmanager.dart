@@ -135,7 +135,7 @@ class EncryptionManager {
 
   /// Entschlüsselt einen mit RSA verschlüsselten Text.
   /// Falls kein privater Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
-  Future<String> decryptRSA(String encryptedText, {RSAPrivateKey? privateKey}) async {
+  Future<Uint8List> decryptRSA(Uint8List bytes, {RSAPrivateKey? privateKey}) async {
     // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
     if (privateKey == null) await initializeRSAKeyPair();
 
@@ -146,19 +146,15 @@ class EncryptionManager {
 
     privateKey ??= _keyRSA!.privateKey;
 
-    final encryptedBytes = base64Decode(encryptedText);
-
     final decryptor = OAEPEncoding(RSAEngine())..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
-    final decryptedBytes = _processInBlocks(decryptor, encryptedBytes);
+    final decryptedBytes = _processInBlocks(decryptor, bytes);
 
-    final decryptedString = utf8.decode(decryptedBytes);
-
-    return decryptedString;
+    return decryptedBytes;
   }
 
   /// Verschlüsselt einen Klartext mit RSA-Verschlüsselung.
   /// Falls kein öffentlicher Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
-  Future<String> encryptRSA(String plainText, {RSAPublicKey? publicKey}) async {
+  Future<Uint8List> encryptRSA(Uint8List bytes, {RSAPublicKey? publicKey}) async {
     // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
     if (publicKey == null) await initializeRSAKeyPair();
 
@@ -170,9 +166,9 @@ class EncryptionManager {
     publicKey ??= _keyRSA!.publicKey;
 
     final encryptor = OAEPEncoding(RSAEngine())..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
-    final encryptedData = _processInBlocks(encryptor, Uint8List.fromList(utf8.encode(plainText)));
+    final encryptedData = _processInBlocks(encryptor, bytes);
 
-    return base64.encode(encryptedData);
+    return encryptedData;
   }
 
   /// Initialisiert das RSA-Schlüsselpaar mit einer angegebenen Bit-Länge (Standard ist 2048).
