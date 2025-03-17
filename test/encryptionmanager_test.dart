@@ -45,6 +45,16 @@ void main() {
       
       expect(decryptedText, equals(plainText));
     });
+
+    test('Encrypt and decrypt RSA should return original text (process in blocks)', () async {
+      const plainText = 'Hello RSA Encryption';
+      
+      await encryptionManager.initializeRSAKeyPair();
+      final encryptedText = await encryptionManager.encryptRSA(Uint8List.fromList(utf8.encode(plainText)), inBlocks: true);
+      final decryptedText = utf8.decode(await encryptionManager.decryptRSA(encryptedText, inBlocks: true));
+      
+      expect(decryptedText, equals(plainText));
+    });
   });
 
   group('RSA Key Initialization', () {

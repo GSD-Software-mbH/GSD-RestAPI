@@ -136,7 +136,7 @@ class EncryptionManager {
 
   /// Entschlüsselt einen mit RSA verschlüsselten Text.
   /// Falls kein privater Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
-  Future<Uint8List> decryptRSA(Uint8List bytes, {RSAPrivateKey? privateKey}) async {
+  Future<Uint8List> decryptRSA(Uint8List bytes, {RSAPrivateKey? privateKey, bool inBlocks = false}) async {
     // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
     if (privateKey == null) await initializeRSAKeyPair();
 
@@ -146,16 +146,23 @@ class EncryptionManager {
     }
 
     privateKey ??= _keyRSA!.privateKey;
-    
-    final rsaEncrypter = encrypt.Encrypter(encrypt.RSA(privateKey: privateKey, encoding: encrypt.RSAEncoding.OAEP, digest: encrypt.RSADigest.SHA256));
-    final encryptedData = Uint8List.fromList(rsaEncrypter.decryptBytes(encrypt.Encrypted(bytes)));
 
-    return encryptedData;
+    Uint8List decryptedBytes;
+    
+    if(inBlocks) {
+      final decryptor = OAEPEncoding(RSAEngine())..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
+      decryptedBytes = _processInBlocks(decryptor, bytes);
+    } else {
+      final rsaEncrypter = encrypt.Encrypter(encrypt.RSA(privateKey: privateKey, encoding: encrypt.RSAEncoding.OAEP, digest: encrypt.RSADigest.SHA256));
+      decryptedBytes = Uint8List.fromList(rsaEncrypter.decryptBytes(encrypt.Encrypted(bytes)));
+    }
+
+    return decryptedBytes;
   }
 
   /// Verschlüsselt einen Klartext mit RSA-Verschlüsselung.
   /// Falls kein öffentlicher Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
-  Future<Uint8List> encryptRSA(Uint8List bytes, {RSAPublicKey? publicKey}) async {
+  Future<Uint8List> encryptRSA(Uint8List bytes, {RSAPublicKey? publicKey, bool inBlocks = false}) async {
     // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
     if (publicKey == null) await initializeRSAKeyPair();
 
@@ -166,10 +173,17 @@ class EncryptionManager {
 
     publicKey ??= _keyRSA!.publicKey;
 
-    final rsaEncrypter = encrypt.Encrypter(encrypt.RSA(publicKey: publicKey, encoding: encrypt.RSAEncoding.OAEP, digest: encrypt.RSADigest.SHA256));
-    final encryptedData = rsaEncrypter.encryptBytes(bytes).bytes;
+    Uint8List encryptedBytes;
 
-    return encryptedData;
+    if(inBlocks) {
+      final decryptor = OAEPEncoding(RSAEngine())..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
+      encryptedBytes = _processInBlocks(decryptor, bytes);
+    } else {
+      final rsaEncrypter = encrypt.Encrypter(encrypt.RSA(publicKey: publicKey, encoding: encrypt.RSAEncoding.OAEP, digest: encrypt.RSADigest.SHA256));
+      encryptedBytes = rsaEncrypter.encryptBytes(bytes).bytes;
+    }
+
+    return encryptedBytes;
   }
 
   /// Initialisiert das RSA-Schlüsselpaar mit einer angegebenen Bit-Länge (Standard ist 2048).
@@ -249,5 +263,20 @@ class EncryptionManager {
     final secureRandom = Random.secure();
     final ivBytes = List<int>.generate(16, (_) => secureRandom.nextInt(256));
     return IV(Uint8List.fromList(ivBytes));
+  }
+
+  /// Hilfsfunktion zur Blockweise-Verarbeitung von Daten (für RSA-Verschlüsselung/Entschlüsselung).
+  Uint8List _processInBlocks(AsymmetricBlockCipher engine, Uint8List input) {
+    final numBlocks = (input.length / engine.inputBlockSize).ceil();
+    final output = BytesBuilder();
+
+    for (var i = 0; i < numBlocks; i++) {
+      final start = i * engine.inputBlockSize;
+      final end = start + engine.inputBlockSize;
+      final chunk = input.sublist(start, end > input.length ? input.length : end);
+      output.add(engine.process(chunk));
+    }
+
+    return output.toBytes();
   }
 }
