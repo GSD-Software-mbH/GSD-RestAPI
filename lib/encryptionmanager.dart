@@ -7,13 +7,12 @@ import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart';
 import 'package:encryption/encryptionoptions.dart';
 import 'package:encryption/extension.dart';
+import 'package:encryption/web/webrsaencryptionmanagerdummy.dart'
+    if (dart.library.html) 'package:encryption/web/webrsaencryptionmanager.dart';
 import 'package:flutter/foundation.dart' as foundation;
-import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pointycastle/export.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:encryption/web/webrsaencryptionmanagerdummy.dart'
-    if (dart.library.html) 'package:encryption/web/webrsaencryptionmanager.dart';
 
 /// Die `EncryptionManager`-Klasse verwaltet AES- und RSA-Verschlüsselung und -Entschlüsselung.
 class EncryptionManager {
@@ -87,7 +86,7 @@ class EncryptionManager {
 
   /// Verschlüsselt den angegebenen Klartext mit AES-Verschlüsselung.
   /// Falls kein Schlüssel angegeben wird, wird der gespeicherte AES-Schlüssel verwendet.
-  Future<String> encryptAES(String plainText, {Key? key, String? padding = "PKCS7"}) async {
+  Future<String> encryptAES(String plainText, {Key? key}) async {
     // Initialisiert den AES-Schlüssel, falls nicht vorhanden
     if (key == null) await initializeAESKey();
 
@@ -99,7 +98,8 @@ class EncryptionManager {
     key ??= _keyAES;
 
     final iv = _generateRandomIV(); // Generiert einen zufälligen IV
-    final encrypter = Encrypter(AES(key!, mode: AESMode.cbc, padding: padding)); // Verwendet AES im CBC-Modus
+    final encrypter =
+        Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
     final encrypted = encrypter.encrypt(plainText, iv: iv);
 
     // Kombiniert den IV mit den verschlüsselten Daten
@@ -112,7 +112,7 @@ class EncryptionManager {
 
   /// Entschlüsselt einen mit AES verschlüsselten Text.
   /// Falls kein Schlüssel angegeben wird, wird der gespeicherte AES-Schlüssel verwendet.
-  Future<String> decryptAES(String encryptedText, {Key? key, String? padding = "PKCS7"}) async {
+  Future<String> decryptAES(String encryptedText, {Key? key}) async {
     // Initialisiert den AES-Schlüssel, falls nicht vorhanden
     if (key == null) await initializeAESKey();
 
@@ -126,8 +126,10 @@ class EncryptionManager {
     try {
       final Map<String, dynamic> decoded = jsonDecode(encryptedText);
       final iv = IV.fromBase64(decoded['iv']);
-      final encrypter = Encrypter(AES(key!, mode: AESMode.cbc, padding: padding)); // Verwendet AES im CBC-Modus
-      final decrypted = encrypter.decrypt(Encrypted.fromBase64(decoded['data']), iv: iv);
+      final encrypter =
+          Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
+      final decrypted =
+          encrypter.decrypt(Encrypted.fromBase64(decoded['data']), iv: iv);
 
       return decrypted;
     } catch (e) {
@@ -138,7 +140,8 @@ class EncryptionManager {
 
   /// Entschlüsselt einen mit RSA verschlüsselten Text.
   /// Falls kein privater Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
-  Future<Uint8List> decryptRSA(Uint8List bytes, {RSAPrivateKey? privateKey, bool inBlocks = false}) async {
+  Future<Uint8List> decryptRSA(Uint8List encryptedBytes,
+      {RSAPrivateKey? privateKey}) async {
     // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
     if (privateKey == null) await initializeRSAKeyPair();
 
@@ -149,22 +152,40 @@ class EncryptionManager {
 
     privateKey ??= _keyRSA!.privateKey;
 
-    Uint8List decryptedBytes;
-    
-    if(inBlocks) {
-      final decryptor = OAEPEncoding(RSAEngine())..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
-      decryptedBytes = _processInBlocks(decryptor, bytes);
-    } else {
-      final rsaEncrypter = encrypt.Encrypter(encrypt.RSA(privateKey: privateKey, encoding: encrypt.RSAEncoding.OAEP, digest: encrypt.RSADigest.SHA256));
-      decryptedBytes = Uint8List.fromList(rsaEncrypter.decryptBytes(encrypt.Encrypted(bytes)));
-    }
+    final rsaEncrypter = Encrypter(RSA(privateKey: privateKey, encoding: RSAEncoding.OAEP, digest: RSADigest.SHA256));
+    final decryptedBytes = Uint8List.fromList(rsaEncrypter.decryptBytes(Encrypted(encryptedBytes)));
 
     return decryptedBytes;
   }
 
+  /// Entschlüsselt einen mit RSA verschlüsselten Text.
+  /// Falls kein privater Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
+  Future<String> decryptRSAInBlocks(String encryptedText,
+      {RSAPrivateKey? privateKey}) async {
+    // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
+    if (privateKey == null) await initializeRSAKeyPair();
+
+    // Überprüft, ob der RSA-Schlüssel verfügbar ist
+    if (_keyRSA == null && privateKey == null) {
+      throw Exception('Key is null');
+    }
+
+    privateKey ??= _keyRSA!.privateKey;
+
+    final encryptedBytes = base64Decode(encryptedText);
+
+    final decryptor = OAEPEncoding(RSAEngine())
+      ..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
+    final decryptedBytes = _processInBlocks(decryptor, encryptedBytes);
+
+    final decryptedString = utf8.decode(decryptedBytes);
+
+    return decryptedString;
+  }
+
   /// Verschlüsselt einen Klartext mit RSA-Verschlüsselung.
   /// Falls kein öffentlicher Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
-  Future<Uint8List> encryptRSA(Uint8List bytes, {RSAPublicKey? publicKey, bool inBlocks = false}) async {
+  Future<Uint8List> encryptRSA(Uint8List plainBytes, {RSAPublicKey? publicKey}) async {
     // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
     if (publicKey == null) await initializeRSAKeyPair();
 
@@ -175,20 +196,35 @@ class EncryptionManager {
 
     publicKey ??= _keyRSA!.publicKey;
 
-    Uint8List encryptedBytes;
-
-    if(inBlocks) {
-      final decryptor = OAEPEncoding(RSAEngine())..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
-      encryptedBytes = _processInBlocks(decryptor, bytes);
-    } else {
-      final rsaEncrypter = encrypt.Encrypter(encrypt.RSA(publicKey: publicKey, encoding: encrypt.RSAEncoding.OAEP, digest: encrypt.RSADigest.SHA256));
-      encryptedBytes = rsaEncrypter.encryptBytes(bytes).bytes;
-    }
+    
+    final rsaEncrypter = Encrypter(RSA(publicKey: publicKey, encoding: RSAEncoding.OAEP, digest: RSADigest.SHA256));
+    final encryptedBytes = rsaEncrypter.encryptBytes(plainBytes).bytes;
 
     return encryptedBytes;
   }
 
-    /// Initialisiert das RSA-Schlüsselpaar mit einer angegebenen Bit-Länge (Standard ist 2048).
+    /// Verschlüsselt einen Klartext mit RSA-Verschlüsselung.
+  /// Falls kein öffentlicher Schlüssel angegeben wird, wird der gespeicherte RSA-Schlüssel verwendet.
+  Future<String> encryptRSAInBlocks(String plainText, {RSAPublicKey? publicKey}) async {
+    // Initialisiert das RSA-Schlüsselpaar, falls nicht vorhanden
+    if (publicKey == null) await initializeRSAKeyPair();
+
+    // Überprüft, ob der RSA-Schlüssel verfügbar ist
+    if (_keyRSA == null && publicKey == null) {
+      throw Exception('Key is null');
+    }
+
+    publicKey ??= _keyRSA!.publicKey;
+
+    final encryptor = OAEPEncoding(RSAEngine())
+      ..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
+    final encryptedData =
+        _processInBlocks(encryptor, Uint8List.fromList(utf8.encode(plainText)));
+
+    return base64.encode(encryptedData);
+  }
+
+  /// Initialisiert das RSA-Schlüsselpaar mit einer angegebenen Bit-Länge (Standard ist 2048).
   Future<void> initializeRSAKeyPair({int bitLength = 2048}) async {
     if (_keyRSA != null) {
       return;
@@ -270,7 +306,6 @@ class EncryptionManager {
     return Key.fromBase64(base64Key);
   }
 
-
   /// Generiert einen sicheren, zufälligen IV für jede Verschlüsselung.
   IV _generateRandomIV() {
     final secureRandom = Random.secure();
@@ -286,7 +321,8 @@ class EncryptionManager {
     for (var i = 0; i < numBlocks; i++) {
       final start = i * engine.inputBlockSize;
       final end = start + engine.inputBlockSize;
-      final chunk = input.sublist(start, end > input.length ? input.length : end);
+      final chunk =
+          input.sublist(start, end > input.length ? input.length : end);
       output.add(engine.process(chunk));
     }
 

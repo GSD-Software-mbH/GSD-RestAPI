@@ -40,8 +40,8 @@ void main() {
       const plainText = 'Hello RSA Encryption';
       
       await encryptionManager.initializeRSAKeyPair();
-      final encryptedText = await encryptionManager.encryptRSA(Uint8List.fromList(utf8.encode(plainText)));
-      final decryptedText = utf8.decode(await encryptionManager.decryptRSA(encryptedText));
+      final encryptedText = await encryptionManager.encryptRSAInBlocks(plainText);
+      final decryptedText = await encryptionManager.decryptRSAInBlocks(encryptedText);
       
       expect(decryptedText, equals(plainText));
     });
@@ -50,8 +50,8 @@ void main() {
       const plainText = 'Hello RSA Encryption';
       
       await encryptionManager.initializeRSAKeyPair();
-      final encryptedText = await encryptionManager.encryptRSA(Uint8List.fromList(utf8.encode(plainText)), inBlocks: true);
-      final decryptedText = utf8.decode(await encryptionManager.decryptRSA(encryptedText, inBlocks: true));
+      final encryptedText = await encryptionManager.encryptRSA(Uint8List.fromList(utf8.encode(plainText)));
+      final decryptedText = utf8.decode(await encryptionManager.decryptRSA(encryptedText));
       
       expect(decryptedText, equals(plainText));
     });
