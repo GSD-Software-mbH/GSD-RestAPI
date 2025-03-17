@@ -86,7 +86,7 @@ class EncryptionManager {
 
   /// Verschlüsselt den angegebenen Klartext mit AES-Verschlüsselung.
   /// Falls kein Schlüssel angegeben wird, wird der gespeicherte AES-Schlüssel verwendet.
-  Future<String> encryptAES(String plainText, {Key? key}) async {
+  Future<String> encryptAES(String plainText, {Key? key, String? padding = "PKCS7"}) async {
     // Initialisiert den AES-Schlüssel, falls nicht vorhanden
     if (key == null) await initializeAESKey();
 
@@ -99,7 +99,7 @@ class EncryptionManager {
 
     final iv = _generateRandomIV(); // Generiert einen zufälligen IV
     final encrypter =
-        Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
+        Encrypter(AES(key!, mode: AESMode.cbc, padding: padding)); // Verwendet AES im CBC-Modus
     final encrypted = encrypter.encrypt(plainText, iv: iv);
 
     // Kombiniert den IV mit den verschlüsselten Daten
@@ -112,7 +112,7 @@ class EncryptionManager {
 
   /// Entschlüsselt einen mit AES verschlüsselten Text.
   /// Falls kein Schlüssel angegeben wird, wird der gespeicherte AES-Schlüssel verwendet.
-  Future<String> decryptAES(String encryptedText, {Key? key}) async {
+  Future<String> decryptAES(String encryptedText, {Key? key, String? padding = "PKCS7"}) async {
     // Initialisiert den AES-Schlüssel, falls nicht vorhanden
     if (key == null) await initializeAESKey();
 
@@ -127,7 +127,7 @@ class EncryptionManager {
       final Map<String, dynamic> decoded = jsonDecode(encryptedText);
       final iv = IV.fromBase64(decoded['iv']);
       final encrypter =
-          Encrypter(AES(key!, mode: AESMode.cbc)); // Verwendet AES im CBC-Modus
+          Encrypter(AES(key!, mode: AESMode.cbc, padding: padding)); // Verwendet AES im CBC-Modus
       final decrypted =
           encrypter.decrypt(Encrypted.fromBase64(decoded['data']), iv: iv);
 
