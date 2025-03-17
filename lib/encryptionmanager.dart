@@ -12,6 +12,8 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pointycastle/export.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:encryption/web/webrsaencryptionmanagerdummy.dart'
+    if (dart.library.html) 'package:encryption/web/webrsaencryptionmanager.dart';
 
 /// Die `EncryptionManager`-Klasse verwaltet AES- und RSA-Verschlüsselung und -Entschlüsselung.
 class EncryptionManager {
@@ -186,9 +188,18 @@ class EncryptionManager {
     return encryptedBytes;
   }
 
-  /// Initialisiert das RSA-Schlüsselpaar mit einer angegebenen Bit-Länge (Standard ist 2048).
+    /// Initialisiert das RSA-Schlüsselpaar mit einer angegebenen Bit-Länge (Standard ist 2048).
   Future<void> initializeRSAKeyPair({int bitLength = 2048}) async {
     if (_keyRSA != null) {
+      return;
+    }
+
+    RSAPublicKey publicKey;
+    RSAPrivateKey privateKey;
+
+    if (foundation.kIsWeb) {
+      _keyRSA =
+          await WebRSAEncryptionManager.generateRSAKeys(bitLength: bitLength);
       return;
     }
 
@@ -199,15 +210,17 @@ class EncryptionManager {
     final seeds = List<int>.generate(32, (_) => seedSource.nextInt(255));
     secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
 
-    final rsaParams = RSAKeyGeneratorParameters(BigInt.parse('65537'), bitLength, 64);
+    final rsaParams =
+        RSAKeyGeneratorParameters(BigInt.parse('65537'), bitLength, 64);
     final params = ParametersWithRandom(rsaParams, secureRandom);
     final keyGenerator = RSAKeyGenerator()..init(params);
 
     final pair = keyGenerator.generateKeyPair();
-    final publicKey = pair.publicKey as RSAPublicKey;
-    final privateKey = pair.privateKey as RSAPrivateKey;
+    publicKey = pair.publicKey as RSAPublicKey;
+    privateKey = pair.privateKey as RSAPrivateKey;
 
-    _keyRSA = AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
+    _keyRSA =
+        AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
   }
 
   /// Initialisiert den AES-Schlüssel durch Erzeugen eines neuen Schlüssels oder durch Abrufen aus dem Speicher.
