@@ -230,13 +230,16 @@ class EncryptionManager {
       return;
     }
 
+    _keyRSA = await generateRandomRSAKey(bitLength: bitLength);
+  }
+
+  Future<AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>> generateRandomRSAKey({int bitLength = 2048}) async {
+
     RSAPublicKey publicKey;
     RSAPrivateKey privateKey;
 
     if (foundation.kIsWeb) {
-      _keyRSA =
-          await WebRSAEncryptionManager.generateRSAKeys(bitLength: bitLength);
-      return;
+      return await WebRSAEncryptionManager.generateRSAKeys(bitLength: bitLength);
     }
 
     final secureRandom = FortunaRandom();
@@ -255,8 +258,7 @@ class EncryptionManager {
     publicKey = pair.publicKey as RSAPublicKey;
     privateKey = pair.privateKey as RSAPrivateKey;
 
-    _keyRSA =
-        AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
+    return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
   }
 
   /// Initialisiert den AES-Schlüssel durch Erzeugen eines neuen Schlüssels oder durch Abrufen aus dem Speicher.
