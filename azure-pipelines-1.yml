@@ -30,11 +30,11 @@ stages:
               Write-Host "Output from cider command: $buildName"
               Write-Host "##vso[build.updatebuildnumber]$buildName"
             displayName: 'Bump Version and Set Build Name'
-            condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+            condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
 
           - task: CmdLine@2
             displayName: 'Set Git Config and Push Version Change'
-            condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+            condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
             inputs:
               script: |
                 git commit -a -m "Vesion patch [skip ci]"
