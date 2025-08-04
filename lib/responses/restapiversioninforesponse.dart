@@ -1,18 +1,41 @@
-import 'dart:convert';
+part of '../restapi.dart';
 
-import 'package:restapi/responses/restapicheckserviceresponse/restapimodule.dart';
-import 'package:restapi/responses/restapiresponse.dart';
-
-/// class for login rest-api responses
+/// Response-Klasse für Webservice-Versionsinformationen
+/// 
+/// Diese Klasse wird verwendet, um detaillierte Informationen über die
+/// Version des REST-API-Webservices und seiner Module zu erhalten.
+/// 
+/// Verwendung:
+/// - Kompatibilitätsprüfungen zwischen Client und Server
+/// - Feature-Verfügbarkeit basierend auf Versionen
+/// - Update-Management und Migrations-Unterstützung
+/// - Debugging und Support-Informationen
 class RestApiVersionInfoResponse extends RestApiResponse {
-  /// sessionId from the [httpResponse.body]
+  /// Version des Webservices
+  /// 
+  /// Hauptversion des REST-API-Services im Format "x.y.z".
   String serviceVersion = "";
+  
+  /// Datum der letzten Strukturänderung
+  /// 
+  /// Gibt an, wann die Datenbank- oder API-Struktur zuletzt geändert wurde.
+  /// Wichtig für Migrations- und Kompatibilitätsprüfungen.
   DateTime? structureChangeDate;
+  
+  /// Liste der verfügbaren Module mit Versionen
+  /// 
+  /// Enthält alle installierten Module des Webservices mit ihren
+  /// spezifischen Versionsnummern für Feature-Detection.
   List<RestApiModule> modules = [];
 
-  /// Creates a [RestApiLoginResponse] object
-  ///
-  /// Throws a [FormatException] if the response body is missing the 'data.sessionId' field.
+  /// Erstellt eine RestApiVersionInfoResponse-Instanz
+  /// 
+  /// Parst die HTTP-Response und extrahiert Versionsinformationen,
+  /// Strukturänderungsdatum und Modul-Details.
+  /// 
+  /// [_httpResponse] - Die HTTP-Response vom VersionInfo-Endpoint
+  /// 
+  /// Throws: FormatException wenn 'data' fehlt
   RestApiVersionInfoResponse(super._httpResponse) {
     var responseJson = jsonDecode(httpResponse.body);
 
@@ -25,13 +48,18 @@ class RestApiVersionInfoResponse extends RestApiResponse {
         dynamic structureChangeDateJson = dataJson['structureChangeDate'];
         dynamic modulesJson = dataJson['listOfModules'];
 
+        // Parse Strukturänderungsdatum
         if(structureChangeDateJson != null) {
           structureChangeDate = DateTime.parse(structureChangeDateJson);
         }
 
+        // Parse Module mit Versionen
         if (modulesJson != null) {
           for (var i = 0; i < modulesJson.length; i++) {
-            modules.add(RestApiModule(modulesJson[i]["moduleName"] ?? "", modulesJson[i]["moduleVersion"] ?? ""));
+            modules.add(RestApiModule(
+              modulesJson[i]["moduleName"] ?? "", 
+              modulesJson[i]["moduleVersion"] ?? ""
+            ));
           }
         }
       }

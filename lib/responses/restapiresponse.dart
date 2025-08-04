@@ -1,40 +1,64 @@
+part of '../restapi.dart';
 
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-
-import 'package:restapi/exception/httprequestexception.dart';
-import 'package:restapi/exception/licenseexception.dart';
-import 'package:restapi/exception/sessioninvalidexception.dart';
-import 'package:restapi/exception/tokenorsessionismissingexception.dart';
-import 'package:restapi/exception/userandpasswrongexception.dart';
-import 'package:restapi/exception/webserviceexepection.dart';
-
-/// Base class rest-api responses
+/// Basisklasse für alle REST-API-Antworten
+/// 
+/// Diese Klasse verarbeitet HTTP-Antworten von der REST-API und extrahiert
+/// Statusinformationen. Sie wirft entsprechende Exceptions basierend auf
+/// dem internen Statuscode der API-Antwort.
+/// 
+/// Unterstützte Statuscodes:
+/// - 0: Erfolg
+/// - 201: Session ungültig
+/// - 204: Token oder Session fehlt
+/// - 302: Falsche Benutzerdaten
+/// - 306/101: Lizenzprobleme
+/// - Andere: Allgemeine Webservice-Fehler
 class RestApiResponse {
-  /// Response from the http.request
+  /// HTTP-Antwort vom Server
   final http.Response _httpResponse;
 
-  /// Field 'status.internalStatus' from the [httpResponse.body]
+  /// Interner Statuscode aus dem 'status.internalStatus' Feld der API-Antwort
+  /// 
+  /// "0" bedeutet Erfolg, alle anderen Werte sind Fehlercodes.
   String _internalStatus = "0";
 
-  /// Field 'status.statusMessage' from the [httpResponse.body]
+  /// Statusnachricht aus dem 'status.statusMessage' Feld der API-Antwort
+  /// 
+  /// Enthält eine beschreibende Nachricht zum Status der Anfrage.
   String _statusMessage = "";
 
-  /// Success: _isOk = true | Error: _isOk = false
+  /// Kennzeichnet ob die Anfrage erfolgreich war
+  /// 
+  /// true = Erfolg (internalStatus == "0"), false = Fehler
   bool _isOk = false;
 
+  /// Getter für die rohe HTTP-Antwort
   http.Response get httpResponse => _httpResponse;
+  
+  /// Getter für den internen Statuscode
   String get internalStatus => _internalStatus;
+  
+  /// Getter für die Statusnachricht
   String get statusMessage => _statusMessage;
+  
+  /// Getter für den Erfolgsstatus
   bool get isOk => _isOk;
 
-  /// Creates a [RestApiResponse] object based on a [http.Response]
-  ///
-  /// Throws an [HttpRequestException] if the statusCode from the [http.Response] is not '200'
-  ///
-  /// Throws an [FormatException] if the [http.Response.body] is missing the following fields: 'status', 'status.internalStatus', status.statusMessage'
-  ///
-  /// Throws an [WebServiceException] if the response from web-service is not '0' OK for all the possible error codes check https://docs.gsd.pl/restapi/errorCodes/errorCodes/
+  /// Erstellt eine RestApiResponse-Instanz basierend auf einer HTTP-Antwort
+  /// 
+  /// Parst die JSON-Antwort und extrahiert Statusinformationen.
+  /// Wirft spezifische Exceptions basierend auf dem internen Statuscode.
+  /// 
+  /// [_httpResponse] - Die HTTP-Antwort vom Server
+  /// 
+  /// Throws:
+  /// - [HttpRequestException] wenn der HTTP-Statuscode nicht 200 ist
+  /// - [FormatException] wenn erforderliche Felder in der Antwort fehlen
+  /// - [SessionInvalidException] bei Statuscode 201
+  /// - [TokenOrSessionIsMissingException] bei Statuscode 204
+  /// - [UserAndPassWrongException] bei Statuscode 302
+  /// - [LicenseException] bei Statuscode 306 oder 101
+  /// - [WebServiceException] bei anderen Fehlercodes
   RestApiResponse(this._httpResponse) {
     Map<String, dynamic> responseJson;
 

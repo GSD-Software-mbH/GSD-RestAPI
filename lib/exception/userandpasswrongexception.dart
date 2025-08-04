@@ -1,20 +1,37 @@
-/// Exception thrown when the web-service is returning an error code
-/// for all error codes check https://docs.gsd.pl/restapi/errorCodes/errorCodes/
+part of '../restapi.dart';
+
+/// Exception für falsche Anmeldedaten
+/// 
+/// Wird geworfen, wenn der Webservice den Fehlercode 302 zurückgibt,
+/// was bedeutet, dass die eingegebenen Anmeldedaten (Benutzername/Passwort)
+/// falsch oder ungültig sind.
+/// 
+/// Diese Exception tritt auf bei:
+/// - Falschem Benutzernamen
+/// - Falschem Passwort
+/// - Deaktiviertem Benutzerkonto
+/// - Gesperrtem Benutzerkonto
+/// - Ungültigen Anmeldedaten
+/// 
+/// Für alle Fehlercodes siehe: https://docs.gsd.pl/restapi/errorCodes/errorCodes/
 class UserAndPassWrongException implements Exception {
-  /// A message describing the format error.
+  /// Beschreibende Fehlernachricht über das Anmeldeproblem
   String message;
 
-  /// The actual 'statusCode' from the http-response
+  /// Der interne Statuscode vom Webservice (normalerweise "302")
   String statusCode;
 
-  /// The actual 'statusMessage' from the http-response
+  /// Die detaillierte Statusnachricht vom Webservice
   String statusMessage;
 
-  /// Creates a new `WebServiceException` with an optional error [message].
-  ///
-  /// Optionally also supply the actual [statusCode] and [statusMessage] from the web-service response
+  /// Erstellt eine neue UserAndPassWrongException
+  /// 
+  /// [message] - Beschreibende Fehlernachricht (optional)
+  /// [statusCode] - Interner Statuscode vom Webservice (optional)
+  /// [statusMessage] - Detaillierte Statusnachricht vom Webservice (optional)
   UserAndPassWrongException([this.message = "", this.statusCode = "", this.statusMessage = ""]);
 
+  /// String-Darstellung der Exception
   @override
   String toString() {
     return message;

@@ -1,21 +1,37 @@
-/// Exception thrown when the web-service is returning an error code
-/// for all error codes check https://docs.gsd.pl/restapi/errorCodes/errorCodes/
+part of '../restapi.dart';
+
+/// Exception für allgemeine Webservice-Fehler
+/// 
+/// Wird als Fallback-Exception für alle anderen Webservice-Fehlercodes geworfen,
+/// die nicht durch spezifische Exception-Klassen abgedeckt sind.
+/// 
+/// Diese Exception tritt auf bei:
+/// - Unbekannten oder neuen Fehlercodes
+/// - Allgemeinen Server-Fehlern
+/// - Unerwarteten API-Antworten
+/// - Temporären Service-Problemen
+/// - Nicht kategorisierten Fehlern
+/// 
+/// Für alle Fehlercodes siehe: https://docs.gsd.pl/restapi/errorCodes/errorCodes/
 class WebServiceException implements Exception {
-  /// A message describing the format error.
+  /// Beschreibende Fehlernachricht über den Webservice-Fehler
   String message;
 
-  /// The actual 'statusCode' from the http-response
+  /// Der interne Statuscode vom Webservice
   String statusCode;
 
-  /// The actual 'statusMessage' from the http-response
+  /// Die detaillierte Statusnachricht vom Webservice
   String statusMessage;
 
-  /// Creates a new `WebServiceException` with an optional error [message].
-  ///
-  /// Optionally also supply the actual [statusCode] and [statusMessage] from the web-service response
+  /// Erstellt eine neue WebServiceException
+  /// 
+  /// [message] - Beschreibende Fehlernachricht (optional)
+  /// [statusCode] - Interner Statuscode vom Webservice (optional)
+  /// [statusMessage] - Detaillierte Statusnachricht vom Webservice (optional)
   WebServiceException(
       [this.message = "", this.statusCode = "", this.statusMessage = ""]);
 
+  /// String-Darstellung der Exception im Format "StatusCode: StatusMessage"
   @override
   String toString(){
     return "$statusCode: $statusMessage";

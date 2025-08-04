@@ -1,28 +1,50 @@
-import 'package:http/http.dart' as http;
-import 'package:restapi/exception/httprequestexception.dart';
+part of '../restapi.dart';
 
-/// Base class rest-api responses
+/// Response-Klasse für Datei-Download-Anfragen
+/// 
+/// Spezialisierte Response-Klasse für den Download von Dateien über die REST-API.
+/// Im Gegensatz zu normalen API-Responses enthält diese Klasse die rohen Datei-Bytes
+/// anstatt JSON-Daten.
+/// 
+/// Verwendung:
+/// - Datei-Downloads über `/v1/file/{oid}`
+/// - Binärdaten (Bilder, Dokumente, etc.)
+/// - Direct File Access ohne JSON-Wrapper
 class RestApiFileResponse {
-  /// Response from the http.request
+  /// HTTP-Response mit den Datei-Daten
+  /// 
+  /// Enthält die rohen Bytes der Datei im Response-Body sowie
+  /// wichtige Header-Informationen wie Content-Type und Content-Length.
   final http.Response _httpResponse;
 
-  /// Success: _isOk = true | Error: _isOk = false
+  /// Erfolgsstatus der Datei-Anfrage
+  /// 
+  /// true = Datei erfolgreich geladen, false = Fehler aufgetreten
   bool _isOk = false;
 
+  /// Getter für die HTTP-Response
   http.Response get httpResponse => _httpResponse;
+  
+  /// Getter für den Erfolgsstatus
   bool get isOk => _isOk;
 
-  /// Creates a [RestApiResponse] object based on a [http.Response]
-  ///
-  /// Throws an [HttpRequestException] if the statusCode from the [http.Response] is not '200'
-
+  /// Erstellt eine RestApiFileResponse-Instanz
+  /// 
+  /// Validiert den HTTP-Statuscode und setzt den Erfolgsstatus.
+  /// Datei-Responses werden direkt über HTTP-Statuscodes validiert,
+  /// nicht über JSON-basierte Statusinformationen.
+  /// 
+  /// [_httpResponse] - Die HTTP-Response vom Datei-Endpoint
+  /// 
+  /// Throws: HttpRequestException wenn Statuscode != 200
   RestApiFileResponse(this._httpResponse) {
     if (httpResponse.statusCode != 200) {
       throw HttpRequestException(
-          "HTTPResponseException: ${httpResponse.statusCode} ${httpResponse.reasonPhrase}", httpResponse.statusCode as String,
+          "HTTPResponseException: ${httpResponse.statusCode} ${httpResponse.reasonPhrase}", 
+          httpResponse.statusCode.toString(),
           reasonPhrase: httpResponse.reasonPhrase);
 
-      // possible to extract status / internalstatus / statusMessage if 404
+      // Mögliche Erweiterung: Status/InternalStatus/StatusMessage bei 404 extrahieren
     } else {
       _isOk = true;
     }

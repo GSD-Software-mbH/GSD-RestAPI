@@ -1,18 +1,34 @@
-/// Exception thrown when the http-request is returning an error code
-/// and there for the web-service could not be reached.
+part of '../restapi.dart';
+
+/// Exception für HTTP-Request-Fehler
+/// 
+/// Wird geworfen, wenn eine HTTP-Anfrage einen Fehlercode zurückgibt
+/// und der Webservice daher nicht erreicht werden konnte.
+/// 
+/// Diese Exception tritt auf bei:
+/// - Netzwerkproblemen
+/// - Server nicht erreichbar
+/// - HTTP-Statuscodes != 200
+/// - Timeout-Problemen
 class HttpRequestException implements Exception {
-  /// A message describing the format error.
+  /// Beschreibende Fehlernachricht
   String message;
 
-  /// The actual 'statusCode' from the http-response
+  /// Der tatsächliche Statuscode aus der HTTP-Antwort
+  /// 
+  /// Beispiele: "404", "500", "503"
   String statusCode;
 
-  /// The actual 'statusMessage' from the http-response
+  /// Die Statusnachricht aus der HTTP-Antwort
+  /// 
+  /// Beispiele: "Not Found", "Internal Server Error", "Service Unavailable"
   String? reasonPhrase;
 
-  /// Creates a new `HttpResponseException` with an optional error [message].
-  ///
-  /// Optionally also supply the actual [statusCode] and [reasonPhrase] from the http response
+  /// Erstellt eine neue HttpRequestException
+  /// 
+  /// [message] - Beschreibende Fehlernachricht
+  /// [statusCode] - HTTP-Statuscode der fehlerhaften Antwort
+  /// [reasonPhrase] - Optional: HTTP-Statusnachricht (Standard: "")
   HttpRequestException(this.message, this.statusCode,
       {this.reasonPhrase = ""});
 }
