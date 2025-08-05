@@ -12,20 +12,12 @@ part of '../restapi.dart';
 /// - Benutzer wurde abgemeldet
 /// 
 /// Für alle Fehlercodes siehe: https://docs.gsd.pl/restapi/errorCodes/errorCodes/
-class SessionInvalidException implements Exception {
-  /// Beschreibende Fehlernachricht
-  String message;
-
-  /// Der interne Statuscode vom Webservice (normalerweise "201")
-  String statusCode;
-
-  /// Die Statusnachricht vom Webservice
-  String statusMessage;
+class SessionInvalidException extends WebServiceException {
 
   /// Erstellt eine neue SessionInvalidException
   /// 
   /// [message] - Beschreibende Fehlernachricht (optional)
   /// [statusCode] - Interner Statuscode vom Webservice (optional)
   /// [statusMessage] - Statusnachricht vom Webservice (optional)
-  SessionInvalidException([this.message = "", this.statusCode = "", this.statusMessage = ""]);
+  SessionInvalidException([super.message = "", super.statusCode = "", super.statusMessage = ""]);
 }

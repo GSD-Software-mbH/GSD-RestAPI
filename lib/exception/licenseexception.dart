@@ -11,26 +11,11 @@ part of '../restapi.dart';
 /// - Fehlenden Lizenz-Berechtigungen
 /// 
 /// Für alle Fehlercodes siehe: https://docs.gsd.pl/restapi/errorCodes/errorCodes/
-class LicenseException implements Exception {
-  /// Beschreibende Fehlernachricht über das Lizenzproblem
-  String message;
-
-  /// Der interne Statuscode vom Webservice (normalerweise "306" oder "101")
-  String statusCode;
-
-  /// Die detaillierte Statusnachricht vom Webservice
-  String statusMessage;
-
+class LicenseException extends WebServiceException {
   /// Erstellt eine neue LicenseException
   /// 
   /// [message] - Beschreibende Fehlernachricht (optional)
   /// [statusCode] - Interner Statuscode vom Webservice (optional)
   /// [statusMessage] - Detaillierte Statusnachricht vom Webservice (optional)
-  LicenseException([this.message = "", this.statusCode = "", this.statusMessage = ""]);
-
-  /// String-Darstellung der Exception
-  @override
-  String toString() {
-    return message;
-  }
+  LicenseException([super.message = "", super.statusCode = "", super.statusMessage = ""]);
 }

@@ -417,7 +417,7 @@ class RestApiManager {
   ///   print("Anmeldung erfolgreich: ${response.sessionId}");
   /// }
   /// ```
-  Future<RestApiLoginResponse> login(String md5Password) async {
+  Future<RestApiLoginResponse> login(String md5Password, {String? twoFactorAuthToken}) async {
     try {
       String v2LoginSecurefunction = "v2/login/secure";
       String v2Loginfunction = "v2/login";
@@ -435,6 +435,7 @@ class RestApiManager {
 
       requestBodyMap['user'] = _userName;
       requestBodyMap['pass'] = md5Password;
+      if(twoFactorAuthToken != null) requestBodyMap['2faToken'] = twoFactorAuthToken;
       requestBodyMap['appNames'] = completeAppnames;
       if (device != null) {
         deviceMap = device!.toJson();

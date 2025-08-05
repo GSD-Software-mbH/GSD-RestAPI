@@ -47,3 +47,5 @@ part 'exception/sessioninvalidexception.dart';
 part 'exception/tokenorsessionismissingexception.dart';
 part 'exception/userandpasswrongexception.dart';
 part 'exception/webserviceexepection.dart';
+part 'exception/missing2fatokenexeption.dart';
+part 'exception/invalid2fatokenexeption.dart';

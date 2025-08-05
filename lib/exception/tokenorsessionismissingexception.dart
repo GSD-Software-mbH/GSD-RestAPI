@@ -14,20 +14,12 @@ part of '../restapi.dart';
 /// - Nicht initialisierten API-Clients
 /// 
 /// Für alle Fehlercodes siehe: https://docs.gsd.pl/restapi/errorCodes/errorCodes/
-class TokenOrSessionIsMissingException implements Exception {
-  /// Beschreibende Fehlernachricht über das fehlende Token/Session
-  String message;
-
-  /// Der interne Statuscode vom Webservice (normalerweise "204")
-  String statusCode;
-
-  /// Die detaillierte Statusnachricht vom Webservice
-  String statusMessage;
+class TokenOrSessionIsMissingException extends WebServiceException {
 
   /// Erstellt eine neue TokenOrSessionIsMissingException
   /// 
   /// [message] - Beschreibende Fehlernachricht (optional)
   /// [statusCode] - Interner Statuscode vom Webservice (optional)
   /// [statusMessage] - Detaillierte Statusnachricht vom Webservice (optional)
-  TokenOrSessionIsMissingException([this.message = "", this.statusCode = "", this.statusMessage = ""]);
+  TokenOrSessionIsMissingException([super.message = "", super.statusCode = "", super.statusMessage = ""]);
 }

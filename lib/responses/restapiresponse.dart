@@ -99,6 +99,10 @@ class RestApiResponse {
       throw UserAndPassWrongException("webservice error: $_internalStatus $_statusMessage", _internalStatus, _statusMessage);
     } else if (_internalStatus == "306" || _internalStatus == "101") {
       throw LicenseException("webservice error: $_internalStatus $_statusMessage", _internalStatus, _statusMessage);
+    } else if (_internalStatus == "341") {
+      throw Missing2FATokenException("webservice error: $_internalStatus $_statusMessage", _internalStatus, _statusMessage);
+    } else if (_internalStatus == "342") {
+      throw Invalid2FATokenException("webservice error: $_internalStatus $_statusMessage", _internalStatus, _statusMessage);
     } else {
       throw WebServiceException("webservice error: $_internalStatus $_statusMessage", _internalStatus, _statusMessage);
     }
