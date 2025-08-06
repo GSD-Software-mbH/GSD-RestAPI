@@ -1,4 +1,4 @@
-# Flutter Encryption
+# GSD-Encryption
 
 Dieses Paket bietet AES- und RSA-Verschlüsselungs- und Entschlüsselungsfunktionen für Flutter-Anwendungen und erleichtert die sichere Speicherung und Verarbeitung von sensiblen Daten. Es umfasst Funktionen zur Verwaltung von Schlüsseln (sowohl symmetrische als auch asymmetrische) und zur sicheren Speicherung im Gerät.
 
