@@ -1,37 +1,45 @@
 import 'dart:convert';
 import 'dart:typed_data';
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:js_util' as js_util;
-import 'package:encryption/extension.dart';
-import 'package:encryption/web/webgeneratekeyoptions.dart';
-import 'package:encryption/web/webhashalgorithm.dart';
-import 'package:js/js.dart';
+import 'dart:js_interop';
+import 'package:gsd_encryption/gsd_encryption.dart';
+import 'package:gsd_encryption/web/webgeneratekeyoptions.dart';
+import 'package:gsd_encryption/web/webhashalgorithm.dart';
+import 'package:web/web.dart';
 import 'package:pointycastle/export.dart';
 
-// Zugriff auf `window.crypto.subtle` in JavaScript
-@JS('window.crypto.subtle')
-external dynamic get subtle;
+// Zugriff auf `window.crypto.subtle` ist bereits über window.crypto.subtle verfügbar
+
+// Extension type für CryptoKeyPair
+@JS()
+@anonymous
+extension type CryptoKeyPair._(JSObject _) implements JSObject {
+  external CryptoKey get publicKey;
+  external CryptoKey get privateKey;
+}
 
 class WebRSAEncryptionManager {
   // Schlüssel generieren
   static Future<AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>> generateRSAKeys({int bitLength = 2048}) async {   
+    final publicExponentArray = Uint8List.fromList([0x01, 0x00, 0x01]);
+    
     final options = GenerateKeyOptions(
       name: 'RSA-OAEP',
       modulusLength: bitLength,
-      publicExponent: Uint8List.fromList([0x01, 0x00, 0x01]),
+      publicExponent: publicExponentArray.toJS,
       hash: HashAlgorithm(name: 'SHA-256'),
     );
 
-    dynamic keypair = await js_util.promiseToFuture(
-      js_util.callMethod(subtle, 'generateKey', [
-        options,
-        true,
-        ['encrypt', 'decrypt']
-      ]),
-    );
+    final usages = ['encrypt', 'decrypt'].map((s) => s.toJS).toList().toJS;
 
-    final publicKey = js_util.getProperty(keypair, 'publicKey');
-    final privateKey = js_util.getProperty(keypair, 'privateKey');
+    final keypairResult = await window.crypto.subtle.generateKey(
+      options,
+      true,
+      usages,
+    ).toDart;
+
+    final keypair = keypairResult as CryptoKeyPair;
+    final publicKey = keypair.publicKey;
+    final privateKey = keypair.privateKey;
 
     final rsaPublicKeyPEM = await _exportPublicKey(publicKey);
     final rsaPrivateKeyPEM = await _exportPrivateKey(privateKey);
@@ -43,13 +51,11 @@ class WebRSAEncryptionManager {
           rsaPublicKey, rsaPrivateKey);
   }
 
-  static Future<String> _exportPublicKey(dynamic publicKey) async {
+  static Future<String> _exportPublicKey(CryptoKey publicKey) async {
     // Exportiere den Schlüssel im SPKI-Format
-    final spkiKey = await js_util.promiseToFuture(
-      js_util.callMethod(subtle, 'exportKey', ['spki', publicKey])
-    );
+    final spkiKey = await window.crypto.subtle.exportKey('spki', publicKey).toDart;
 
-    final spkiKeyBuffer = spkiKey as ByteBuffer; // Typcasting in ByteBuffer
+    final spkiKeyBuffer = (spkiKey as JSArrayBuffer).toDart; // Verwende toDart für die Konvertierung
     final spkiKeyBytes = Uint8List.view(spkiKeyBuffer); // Konvertierung in Uint8List
     final base64Key = base64Encode(spkiKeyBytes); // Base64-Kodierung
 
@@ -63,13 +69,11 @@ class WebRSAEncryptionManager {
     return pemKey;
   }
 
-  static Future<String> _exportPrivateKey(dynamic privateKey) async {
+  static Future<String> _exportPrivateKey(CryptoKey privateKey) async {
     // Exportiere den Schlüssel im PKCS8-Format
-    final pkcs8Key = await js_util.promiseToFuture(
-      js_util.callMethod(subtle, 'exportKey', ['pkcs8', privateKey])
-    );
+    final pkcs8Key = await window.crypto.subtle.exportKey('pkcs8', privateKey).toDart;
 
-    final pkcs8KeyBuffer = pkcs8Key as ByteBuffer; // Typcasting in ByteBuffer
+    final pkcs8KeyBuffer = (pkcs8Key as JSArrayBuffer).toDart; // Verwende toDart für die Konvertierung
     final pkcs8KeyBytes = Uint8List.view(pkcs8KeyBuffer); // Konvertierung in Uint8List
     final base64Key = base64Encode(pkcs8KeyBytes); // Base64-Kodierung
 

@@ -8,10 +8,7 @@ Fügen Sie das Paket in Ihrer `pubspec.yaml` hinzu:
 
 ```yaml
 dependencies:
-  encryption:
-    git:
-      url: http://gsd-dfdev:8080/tfs/DefaultCollection/Flutter%20Encryption/_git/Flutter%20Encryption
-      ref: master
+  gsd_encryption: ^0.1.1
 ```
 
 Führen Sie anschließend `flutter pub get` aus, um das Paket zu installieren.
@@ -23,7 +20,7 @@ Führen Sie anschließend `flutter pub get` aus, um das Paket zu installieren.
 Erstellen Sie eine Instanz des `EncryptionManager` für die Verschlüsselungs- und Entschlüsselungsfunktionen:
 
 ```dart
-import 'package:encryption/encryptionmanager.dart';
+import 'package:gsd_encryption/gsd_encryption.dart';
 
 final encryptionManager = EncryptionManager();
 ```

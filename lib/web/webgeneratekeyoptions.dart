@@ -1,15 +1,14 @@
-import 'package:encryption/web/webhashalgorithm.dart';
-import 'package:js/js.dart';
-import 'dart:typed_data';
+import 'package:gsd_encryption/web/webhashalgorithm.dart';
+import 'dart:js_interop';
 
 // Optionen für die Schlüsselerzeugung
 @JS()
 @anonymous
-class GenerateKeyOptions {
+extension type GenerateKeyOptions._(JSObject _) implements JSObject {
   external factory GenerateKeyOptions({
     String name,
     int modulusLength,
-    Uint8List publicExponent,
+    JSUint8Array publicExponent,
     HashAlgorithm hash,
   });
 }

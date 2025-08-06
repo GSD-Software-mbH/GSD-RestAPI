@@ -1,16 +1,4 @@
-import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
-import 'dart:typed_data';
-import 'package:encrypt/encrypt.dart';
-import 'package:encryption/encryptionoptions.dart';
-import 'package:encryption/extension.dart';
-import 'package:encryption/web/webrsaencryptionmanagerdummy.dart'
-    if (dart.library.html) 'package:encryption/web/webrsaencryptionmanager.dart';
-import 'package:flutter/foundation.dart' as foundation;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:pointycastle/export.dart';
-import 'package:flutter/services.dart' show rootBundle;
+part of 'gsd_encryption.dart';
 
 /// Die `EncryptionManager`-Klasse verwaltet AES- und RSA-Verschlüsselung und -Entschlüsselung.
 class EncryptionManager {

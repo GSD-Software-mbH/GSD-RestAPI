@@ -1,0 +1,4 @@
+# Ignoriere Entwicklungsdateien
+azure-pipelines*.yml
+dartdoc_options.yaml
+CHANGELOG.md

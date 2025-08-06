@@ -1,8 +1,8 @@
-import 'package:js/js.dart';
+import 'dart:js_interop';
 
 // Hash-Algorithmus konfigurieren
 @JS()
 @anonymous
-class HashAlgorithm {
+extension type HashAlgorithm._(JSObject _) implements JSObject {
   external factory HashAlgorithm({String name});
 }

@@ -1,3 +1,5 @@
+part of 'gsd_encryption.dart';
+
 class EncryptionOptions {
 
   String get rsaPrivateKeyFilePath {
