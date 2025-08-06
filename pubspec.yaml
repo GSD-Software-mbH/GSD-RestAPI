@@ -1,6 +1,6 @@
 name: gsd_encryption
 description: "AES and RSA encryption/decryption package for Flutter with secure key storage and cross-platform support including web."
-version: 0.1.6
+version: 0.1.7
 repository: https://github.com/GSD-Software-mbH/GSD-Encryption
 homepage: https://gsd-software.com
 documentation: https://github.com/GSD-Software-mbH/GSD-Encryption
