@@ -1,8 +1,43 @@
 part of 'gsd_encryption.dart';
 
-/// Erweiterung für `String`, um die Parsing-Funktionalität für RSA-öffentliche Schlüssel im PEM-Format hinzuzufügen
+/// Erweiterung für `String` zur Verarbeitung von RSA-Schlüsseln im PEM-Format.
+/// 
+/// Diese Extension erweitert die String-Klasse um Funktionen zum Parsen von
+/// RSA-Schlüsseln aus dem PEM-Format. Sie unterstützt sowohl öffentliche als
+/// auch private Schlüssel und konvertiert sie in die entsprechenden
+/// pointycastle-Objekte.
+/// 
+/// **Unterstützte Formate:**
+/// - **Öffentliche Schlüssel**: SPKI (Subject Public Key Info) Format
+/// - **Private Schlüssel**: PKCS#8 Format
+/// - **Encoding**: Base64 mit PEM-Headern und -Footern
+/// 
+/// **Verwendung:**
+/// ```dart
+/// String publicKeyPem = "-----BEGIN PUBLIC KEY-----\n...";
+/// RSAPublicKey publicKey = publicKeyPem.parsePublicKeyFromPem();
+/// 
+/// String privateKeyPem = "-----BEGIN PRIVATE KEY-----\n...";
+/// RSAPrivateKey privateKey = privateKeyPem.parsePrivateKeyFromPem();
+/// ```
+/// 
+/// **Interne Verarbeitung:**
+/// - Entfernung der PEM-Header und -Footer
+/// - Base64-Dekodierung des Schlüsselmaterials
+/// - ASN.1-Parsing der binären Daten
+/// - Extraktion der mathematischen Parameter (Modulus, Exponenten)
 extension StringExtensions on String {
-  /// Funktion zum Parsen eines öffentlichen Schlüssels aus dem PEM-Format und Rückgabe als `RSAPublicKey`
+  /// Parst einen öffentlichen RSA-Schlüssel aus dem PEM-Format (SPKI).
+  /// 
+  /// Diese Methode dekodiert einen PEM-formatierten öffentlichen Schlüssel und
+  /// extrahiert die mathematischen Parameter (Modulus und Exponent) durch
+  /// ASN.1-Parsing. Das resultierende RSAPublicKey-Objekt kann für
+  /// Verschlüsselungsoperationen verwendet werden.
+  /// 
+  /// Rückgabe: RSAPublicKey-Objekt mit Modulus und öffentlichem Exponenten
+  /// 
+  /// Wirft eine Exception, wenn das PEM-Format ungültig ist oder die
+  /// ASN.1-Struktur nicht den Erwartungen entspricht.
   RSAPublicKey parsePublicKeyFromPem() {
     // Entferne die PEM-Header und -Footer und dekodiere den Base64-PEM-Block
     final pemLines = split('\n');
@@ -39,7 +74,17 @@ extension StringExtensions on String {
     return RSAPublicKey(modulusBigInt, exponentBigInt);
   }
 
-  /// Funktion zum Parsen eines privaten Schlüssels aus dem PEM-Format und Rückgabe als `RSAPrivateKey`
+  /// Parst einen privaten RSA-Schlüssel aus dem PEM-Format (PKCS#8).
+  /// 
+  /// Diese Methode dekodiert einen PEM-formatierten privaten Schlüssel und
+  /// extrahiert alle notwendigen mathematischen Parameter (Modulus, private und
+  /// öffentliche Exponenten, Primfaktoren) durch ASN.1-Parsing. Das resultierende
+  /// RSAPrivateKey-Objekt kann für Entschlüsselungsoperationen verwendet werden.
+  /// 
+  /// Rückgabe: RSAPrivateKey-Objekt mit allen notwendigen Parametern
+  /// 
+  /// Wirft eine Exception, wenn das PEM-Format ungültig ist oder die
+  /// ASN.1-Struktur nicht den PKCS#8-Erwartungen entspricht.
   RSAPrivateKey parsePrivateKeyFromPem() {
     // Entferne die PEM-Header und -Footer und dekodiere den Base64-PEM-Block
     final pemLines = split('\n');
@@ -74,15 +119,52 @@ extension StringExtensions on String {
     return RSAPrivateKey(modulus, privateExponent, prime1, prime2);
   }
 
-  /// Hilfsfunktion: Konvertiert eine Liste von Bytes in BigInt
+  /// Konvertiert ein Byte-Array in ein BigInt-Objekt.
+  /// 
+  /// Diese private Hilfsmethode konvertiert die Bytes eines ASN.1-Integer-Werts
+  /// in ein BigInt-Objekt, das für RSA-Berechnungen verwendet werden kann.
+  /// Die Konvertierung erfolgt über Hexadezimal-Darstellung.
+  /// 
+  /// Parameter:
+  /// - [bytes]: Die zu konvertierenden Bytes
+  /// 
+  /// Rückgabe: BigInt-Darstellung der Bytes
   BigInt _bytesToBigInt(Uint8List bytes) {
     return BigInt.parse(bytes.map((byte) => byte.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
   }
 }
 
-/// Erweiterung für `RSAPublicKey`, um die Konvertierung des RSA Public Keys ins PEM-Format hinzuzufügen
+/// Erweiterung für `RSAPublicKey` zur Konvertierung in das PEM-Format.
+/// 
+/// Diese Extension erweitert die RSAPublicKey-Klasse um die Funktionalität,
+/// einen RSA-öffentlichen Schlüssel in das standardisierte PEM-Format zu
+/// konvertieren. Dies ist nützlich für den Austausch von Schlüsseln oder
+/// die Speicherung in Dateien.
+/// 
+/// **Ausgabeformat:**
+/// - SPKI (Subject Public Key Info) Struktur
+/// - Base64-Kodierung mit PEM-Headern und -Footern
+/// - 64-Zeichen-Zeilenlänge für bessere Lesbarkeit
+/// 
+/// **Verwendung:**
+/// ```dart
+/// RSAPublicKey publicKey = ...;
+/// String pemString = publicKey.encodeToPem();
+/// print(pemString); // -----BEGIN PUBLIC KEY-----\n...
+/// ```
 extension RSAPublicKeyExtention on RSAPublicKey {
-  /// Funktion zur Kodierung des RSA-öffentlichen Schlüssels in das PEM-Format
+  /// Konvertiert den RSA-öffentlichen Schlüssel in das PEM-Format.
+  /// 
+  /// Diese Methode erstellt eine ASN.1-Struktur entsprechend dem SPKI-Standard
+  /// und konvertiert sie in das PEM-Format mit entsprechenden Headern und Footern.
+  /// Das resultierende Format ist kompatibel mit OpenSSL und anderen
+  /// kryptographischen Bibliotheken.
+  /// 
+  /// Rückgabe: PEM-formatierter String des öffentlichen Schlüssels
+  /// 
+  /// Die Ausgabe enthält die standard PEM-Header "-----BEGIN PUBLIC KEY-----"
+  /// und "-----END PUBLIC KEY-----" mit dem Base64-kodierten Schlüsselmaterial
+  /// dazwischen, aufgeteilt in 64-Zeichen-Zeilen.
   String encodeToPem() {
     // Erstelle ASN.1-Objekte für Modulus und Exponent
     final asn1Modulus = ASN1Integer(modulus!);
@@ -122,16 +204,45 @@ extension RSAPublicKeyExtention on RSAPublicKey {
     return pemString;
   }
 
-  /// Funktion, um den Base64-String in bestimmte Zeilenlängen zu unterteilen
+  /// Teilt einen Base64-String in Zeilen mit einer bestimmten maximalen Länge auf.
+  /// 
+  /// Diese private Hilfsmethode formatiert den Base64-String so, dass er den
+  /// PEM-Konventionen entspricht, bei denen jede Zeile maximal 64 Zeichen lang ist.
+  /// 
+  /// Parameter:
+  /// - [str]: Der zu formatierende Base64-String
+  /// - [chunkSize]: Die maximale Zeilenlänge (Standard: 64)
+  /// 
+  /// Rückgabe: Formatierter String mit Zeilenumbrüchen
   String _chunked(String str, int chunkSize) {
     final RegExp pattern = RegExp('.{1,$chunkSize}');
     return pattern.allMatches(str).map((m) => m.group(0)).join('\r\n');
   }
 }
 
-/// Erweiterung für `Uint8List`, um eine Funktion zur Konvertierung von Bytes in einen Hex-String hinzuzufügen
+/// Erweiterung für `Uint8List` zur Hexadezimal-Konvertierung.
+/// 
+/// Diese Extension erweitert die Uint8List-Klasse um eine praktische Methode
+/// zur Konvertierung von Byte-Arrays in Hexadezimal-Strings. Dies ist besonders
+/// nützlich für Debugging, Logging und die Darstellung von kryptographischen
+/// Daten in lesbarer Form.
+/// 
+/// **Verwendung:**
+/// ```dart
+/// Uint8List bytes = Uint8List.fromList([0x41, 0x42, 0x43]);
+/// String hex = bytes.bytesToHex(); // "414243"
+/// ```
 extension Uint8ListExtention on Uint8List {
-  /// Konvertiert die Bytes in einen Hexadezimal-String
+  /// Konvertiert die Bytes in einen Hexadezimal-String.
+  /// 
+  /// Diese Methode durchläuft alle Bytes im Array und konvertiert jeden Byte-Wert
+  /// in seine zweistellige Hexadezimal-Darstellung. Führende Nullen werden
+  /// beibehalten, um eine einheitliche Formatierung zu gewährleisten.
+  /// 
+  /// Rückgabe: Hexadezimal-String ohne Trennzeichen (z.B. "41424344" für [0x41, 0x42, 0x43, 0x44])
+  /// 
+  /// Die Ausgabe enthält nur die Hexadezimal-Zeichen 0-9 und a-f ohne Präfix
+  /// oder Trennzeichen. Jeder Byte wird als genau zwei Zeichen dargestellt.
   String bytesToHex() {
     return map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
   }
