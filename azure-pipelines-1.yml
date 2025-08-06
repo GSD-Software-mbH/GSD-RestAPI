@@ -93,12 +93,12 @@ stages:
               GITHUB_TOKEN: $(GITHUB_TOKEN)
             inputs:
               script: |
-                git config --global user.email "buildAgent@gsd-software.com"
-                git config --global user.name "Build Agent"
+                git config --global user.email "info@gsd-software.com"
+                git config --global user.name "GSD Software CI/CD"
                 git config --global push.default simple
                 git remote remove github 2>nul || echo "Remote doesn't exist"
                 git remote add github https://$(GITHUB_TOKEN)@github.com/GSD-Software-mbH/GSD-Encryption.git
                 git fetch --all --tags
-                git branch -a
-                git push github HEAD:main --force --tags
+                git checkout -B master origin/master
+                git push github master:refs/heads/main --force --tags
                 echo "Successfully force-pushed complete branch to GitHub"
