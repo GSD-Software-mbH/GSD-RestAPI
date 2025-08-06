@@ -56,6 +56,15 @@ stages:
         displayName: Publish Package
         steps:
           - checkout: self
+            persistCredentials: true
+
+          - task: CmdLine@2
+            displayName: "Pull Latest Changes"
+            inputs:
+              script: |
+                git config --global user.email "buildAgent@gsd-software.com"
+                git config --global user.name "Build Agent"
+                git pull origin $(Build.SourceBranchName)
 
           - task: CmdLine@2
             displayName: "Publish to pub.dev"
@@ -76,18 +85,28 @@ stages:
         steps:
           - checkout: self
             persistCredentials: true
+            fetchDepth: 0  # Fetch complete history
 
           - task: CmdLine@2
-            displayName: "Setup Git for GitHub"
+            displayName: "Setup Git and Force Push to GitHub"
+            env:
+              GITHUB_TOKEN: $(GITHUB_TOKEN)
             inputs:
               script: |
                 git config --global user.email "buildAgent@gsd-software.com"
                 git config --global user.name "Build Agent"
-                git remote add github https://$(GITHUB_TOKEN)@github.com/GSD-Software-mbH/GSD-Encryption.git 2>nul || echo "Remote already exists"
-
-          - task: CmdLine@2
-            displayName: "Push to GitHub"
-            inputs:
-              script: |
-                git fetch origin
-                git push github HEAD:main --tags --force
+                git config --global push.default simple
+                
+                # Remove existing GitHub remote if it exists
+                git remote remove github 2>nul || echo "Remote doesn't exist"
+                
+                # Add GitHub remote with token
+                git remote add github https://$(GITHUB_TOKEN)@github.com/GSD-Software-mbH/GSD-Encryption.git
+                
+                # Fetch latest from Azure DevOps origin
+                git fetch origin --all --tags
+                
+                # Force push complete branch to GitHub main, overwriting everything
+                git push github master:main --force --tags
+                
+                echo "Successfully force-pushed complete branch to GitHub"
