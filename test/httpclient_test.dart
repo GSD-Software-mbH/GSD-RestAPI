@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import 'package:restapi/httpclient/httpclient.dart';
+import 'package:gsd_restapi/httpclient/httpclient.dart';
 import 'dart:io';
-import 'package:restapi/restapi.dart';
 
 void main() {
   late http.Client allowSslClient;

@@ -1,4 +1,4 @@
-part of 'restapi.dart';
+part of 'gsd_restapi.dart';
 
 /// Enum für unterstützte HTTP-Methoden
 /// 
@@ -31,7 +31,7 @@ enum HttpMethod {
 /// - Verschlüsselung und Entschlüsselung von Anfragen/Antworten
 /// - Firebase Performance-Monitoring
 /// - Fehlerbehandlung und Exception-Management
-class RestApiManager {
+class RestApiDOCUframeManager {
   /// Timeout für HTTP-Verbindungsaufbau (5 Sekunden)
   final Duration _connectionTimeout = const Duration(seconds: 5);
   
@@ -169,7 +169,7 @@ class RestApiManager {
   /// [sessionid] - Bereits vorhandene Session-ID (optional)
   /// [allowSslError] - SSL-Fehler ignorieren (Standard: false)
   /// [firebasePerformance] - Firebase Performance Monitoring (optional)
-  RestApiManager(this._appKey, this._userName, this.appNames, this._serverUrl, this._alias,
+  RestApiDOCUframeManager(this._appKey, this._userName, this.appNames, this._serverUrl, this._alias,
       {this.device, int perPageCount = 50, String sessionid = "", bool allowSslError = false, firebase_performance.FirebasePerformance? firebasePerformance}) {
     _perPageCount = perPageCount;
     _sessionId = sessionid;
@@ -2389,7 +2389,7 @@ class RestApiManager {
   /// );
   /// ```
   Future<RestApiResponse> postFolders(String folderName, String parentFolder,
-      {RestApiFolderType parentFolderSourceType = RestApiFolderType.path}) async {
+      {RestApiDOCUframeFolderType parentFolderSourceType = RestApiDOCUframeFolderType.path}) async {
     try {
       Map<String, dynamic> bodyMap = {};
       String body;
@@ -2498,7 +2498,7 @@ class RestApiManager {
   ///   ["doc-123", "doc-456", "doc-789"]
   /// );
   /// ```
-  Future<RestApiResponse> patchFoldersAdd(RestApiFolderType folderType, String folderId, List<String> documentOids,
+  Future<RestApiResponse> patchFoldersAdd(RestApiDOCUframeFolderType folderType, String folderId, List<String> documentOids,
       {String className = ""}) async {
     try {
       Map<String, dynamic> documentsMap = {};
@@ -2546,7 +2546,7 @@ class RestApiManager {
   ///   moveToTrashBin: false
   /// );
   /// ```
-  Future<RestApiResponse> patchFoldersRemoveDocuments(RestApiFolderType folderType, String folderId, List<String> documentOids,
+  Future<RestApiResponse> patchFoldersRemoveDocuments(RestApiDOCUframeFolderType folderType, String folderId, List<String> documentOids,
       {String className = "", bool moveToTrashBin = true, deep = false}) async {
     try {
       Map<String, dynamic> bodyMap = {};
@@ -2599,7 +2599,7 @@ class RestApiManager {
   ///   cut: true // verschieben
   /// );
   /// ```
-  Future<RestApiResponse> patchFoldersCopyDocuments(RestApiFolderType destinationFolderSourceType, String destinationFolderId, List<String> documentOids, {RestApiFolderType? sourceFolderSourceType, String? sourceFolderId, bool cut = true}) async {
+  Future<RestApiResponse> patchFoldersCopyDocuments(RestApiDOCUframeFolderType destinationFolderSourceType, String destinationFolderId, List<String> documentOids, {RestApiDOCUframeFolderType? sourceFolderSourceType, String? sourceFolderId, bool cut = true}) async {
     try {
       Map<String, dynamic> bodyMap = {};
       String body;

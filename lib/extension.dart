@@ -1,4 +1,4 @@
-part of 'restapi.dart';
+part of 'gsd_restapi.dart';
 
 /// Extension für String-Klasse mit REST-API-spezifischen Hilfsmethoden
 /// 

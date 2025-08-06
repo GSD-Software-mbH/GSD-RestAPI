@@ -1,4 +1,4 @@
-part of '../restapi.dart';
+part of '../gsd_restapi.dart';
 
 /// Response-Klasse für Webservice-Versionsinformationen
 /// 
@@ -26,7 +26,7 @@ class RestApiVersionInfoResponse extends RestApiResponse {
   /// 
   /// Enthält alle installierten Module des Webservices mit ihren
   /// spezifischen Versionsnummern für Feature-Detection.
-  List<RestApiModule> modules = [];
+  List<RestApiDOCUframeModule> modules = [];
 
   /// Erstellt eine RestApiVersionInfoResponse-Instanz
   /// 
@@ -56,7 +56,7 @@ class RestApiVersionInfoResponse extends RestApiResponse {
         // Parse Module mit Versionen
         if (modulesJson != null) {
           for (var i = 0; i < modulesJson.length; i++) {
-            modules.add(RestApiModule(
+            modules.add(RestApiDOCUframeModule(
               modulesJson[i]["moduleName"] ?? "", 
               modulesJson[i]["moduleVersion"] ?? ""
             ));

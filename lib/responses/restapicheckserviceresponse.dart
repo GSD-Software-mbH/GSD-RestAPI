@@ -1,4 +1,4 @@
-part of '../restapi.dart';
+part of '../gsd_restapi.dart';
 
 /// Response-Klasse für Service-Status-Überprüfungen
 /// 
@@ -23,7 +23,7 @@ class RestApiCheckServiceResponse extends RestApiResponse {
   /// Liste der verfügbaren Datenbanken und deren Module
   /// 
   /// Jede Datenbank enthält eine Liste der verfügbaren Module mit Versionsinformationen.
-  List<RestApiDatabase> databases = [];
+  List<RestApiDOCUframeDatabase> databases = [];
 
   /// Erstellt eine RestApiCheckServiceResponse-Instanz
   /// 
@@ -53,12 +53,12 @@ class RestApiCheckServiceResponse extends RestApiResponse {
           // Extrahiere Datenbank- und Modul-Informationen
           if(databasesJson != null && databasesJson.entries.isNotEmpty) {
             for (var i = 0; i < databasesJson.entries.length; i++) {
-              RestApiDatabase database = RestApiDatabase(databasesJson.keys.elementAt(i), []);
+              RestApiDOCUframeDatabase database = RestApiDOCUframeDatabase(databasesJson.keys.elementAt(i), []);
               dynamic modulesJson = databasesJson.values.elementAt(i);
 
               if(modulesJson != null) {
                 for (var i = 0; i < modulesJson.length; i++) {
-                  database.modules.add(RestApiModule(
+                  database.modules.add(RestApiDOCUframeModule(
                     modulesJson[i]["moduleName"] ?? "", 
                     modulesJson[i]["moduleVersion"] ?? ""
                   ));

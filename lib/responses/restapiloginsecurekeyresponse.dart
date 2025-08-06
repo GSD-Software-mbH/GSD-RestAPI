@@ -1,4 +1,4 @@
-part of '../restapi.dart';
+part of '../gsd_restapi.dart';
 
 /// Response-Klasse für Login-Verschlüsselungsschlüssel-Anfragen
 /// 

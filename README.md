@@ -1,4 +1,4 @@
-# Flutter RestAPI
+# GSD-RestAPI
 
 Dieses Paket bietet umfassende REST-API-Funktionen für Flutter-Anwendungen mit automatischer Session-Verwaltung, Verschlüsselung, verschiedenen HTTP-Methoden und Firebase Performance Monitoring. Es ermöglicht die strukturierte Kommunikation mit REST-APIs sowohl für Debug-Zwecke als auch für die Produktionsüberwachung.
 
@@ -23,10 +23,7 @@ Fügen Sie das Paket in Ihrer `pubspec.yaml` hinzu:
 
 ```yaml
 dependencies:
-  restapi:
-    git:
-      url: [Ihre Repository URL]
-      ref: main
+  gsd_restapi: ^0.1.1
 ```
 
 Führen Sie anschließend `flutter pub get` aus, um das Paket zu installieren.
@@ -38,9 +35,9 @@ Führen Sie anschließend `flutter pub get` aus, um das Paket zu installieren.
 Erstellen Sie eine Instanz des RestApiManagers mit den erforderlichen Parametern:
 
 ```dart
-import 'package:restapi/restapimanager.dart';
+import 'package:gsd_restapi/gsd_restapi.dart';
 
-final RestApiManager apiManager = RestApiManager(
+final RestApiDOCUframeManager apiManager = RestApiDOCUframeManager(
   'GSD-DFApp',                    // App Key
   'GSDAdmin',                     // Username
   ['GSD-RestApi', 'GSD-DFApp'],  // App Names
@@ -144,7 +141,7 @@ import 'package:firebase_performance/firebase_performance.dart';
 // Firebase Performance Monitoring aktivieren
 FirebasePerformance performance = FirebasePerformance.instance;
 
-RestApiManager apiManager = RestApiManager(
+RestApiDOCUframeManager apiManager = RestApiDOCUframeManager(
   // ... andere Parameter
   firebasePerformance: performance,
 );
@@ -163,7 +160,7 @@ RestApiManager apiManager = RestApiManager(
 ### SSL-Konfiguration
 
 ```dart
-RestApiManager apiManager = RestApiManager(
+RestApiDOCUframeManager apiManager = RestApiDOCUframeManager(
   // ... andere Parameter
   allowSslError: true,  // SSL-Fehler ignorieren
 );

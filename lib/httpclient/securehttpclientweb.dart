@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/browser_client.dart';
 import 'package:http/http.dart' as http;
-import 'package:restapi/restapi.dart';
+import 'package:gsd_restapi/gsd_restapi.dart';
 
 /// Sicherer HTTP-Client für Web-Plattformen
 /// 

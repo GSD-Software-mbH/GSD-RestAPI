@@ -1,4 +1,4 @@
-part of 'restapi.dart';
+part of 'gsd_restapi.dart';
 
 /// Repräsentiert ein Modul im REST-API-Service
 /// 
@@ -12,7 +12,7 @@ part of 'restapi.dart';
 /// - Feature-Verfügbarkeit-Checks
 /// - Versions-Kompatibilität zwischen Client und Server
 /// - Funktions-spezifische API-Aufrufe
-class RestApiModule {
+class RestApiDOCUframeModule {
   /// Name des Moduls
   /// 
   /// Eindeutige Identifikation des Moduls (z.B. "Core", "Email", "Calendar").
@@ -27,5 +27,5 @@ class RestApiModule {
   /// 
   /// [name] - Name des Moduls
   /// [version] - Versionsnummer des Moduls
-  RestApiModule(this.name, this.version);
+  RestApiDOCUframeModule(this.name, this.version);
 }

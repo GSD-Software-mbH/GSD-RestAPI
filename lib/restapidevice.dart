@@ -1,4 +1,4 @@
-part of 'restapi.dart';
+part of 'gsd_restapi.dart';
 
 /// Repräsentiert ein Gerät, das sich bei der REST-API anmeldet
 /// 

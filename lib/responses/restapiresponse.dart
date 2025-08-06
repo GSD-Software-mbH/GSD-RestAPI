@@ -1,4 +1,4 @@
-part of '../restapi.dart';
+part of '../gsd_restapi.dart';
 
 /// Basisklasse für alle REST-API-Antworten
 /// 

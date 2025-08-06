@@ -1,4 +1,4 @@
-part of 'restapi.dart';
+part of 'gsd_restapi.dart';
 
 /// Wrapper-Klasse für HTTP-Anfragen an die REST-API
 /// 

@@ -1,12 +1,11 @@
-library restapi;
+library gsd_restapi;
 
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:encrypt/encrypt.dart' as encrpyt;
-import 'package:encryption/encryptionmanager.dart';
-import 'package:encryption/extension.dart';
+import 'package:gsd_encryption/gsd_encryption.dart';
 import 'package:event/event.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_performance/firebase_performance.dart' as firebase_performance;
@@ -16,15 +15,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:iso8601_duration/iso8601_duration.dart';
 import 'package:pointycastle/export.dart';
-import 'package:restapi/httpclient/httpclient.dart';
+import 'package:gsd_restapi/httpclient/httpclient.dart';
 
 // Core Classes
-part 'restapidatabase.dart';
+part 'restapidocuframedatabase.dart';
 part 'restapidevice.dart';
 part 'restapidevicetype.dart';
-part 'restapifoldertype.dart';
-part 'restapimanager.dart';
-part 'restapimodule.dart';
+part 'restapidocuframefoldertype.dart';
+part 'restapidocuframemanager.dart';
+part 'restapidocuframemodule.dart';
 part 'restapirequest.dart';
 part 'extension.dart';
 

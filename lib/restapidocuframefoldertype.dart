@@ -1,9 +1,9 @@
-part of 'restapi.dart';
+part of 'gsd_restapi.dart';
 
 /// Enum für verschiedene Ordnertypen in der REST-API
 /// 
 /// Definiert die verschiedenen Arten, wie Ordner identifiziert und abgerufen werden können.
-enum RestApiFolderType {
+enum RestApiDOCUframeFolderType {
   /// Ordner nach Typ identifizieren (Nummer: 0, Wert: 'type')
   type(0, 'type'),
   
@@ -17,7 +17,7 @@ enum RestApiFolderType {
   /// 
   /// [number] - Numerische Kennung des Ordnertyps
   /// [value] - String-Wert für API-Aufrufe
-  const RestApiFolderType(this.number, this.value );
+  const RestApiDOCUframeFolderType(this.number, this.value );
 
   /// Numerische Kennung des Ordnertyps
   final int number;

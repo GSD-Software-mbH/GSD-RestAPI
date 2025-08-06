@@ -1,6 +1,6 @@
 // http_client_io.dart
 import 'dart:io';
-import 'package:restapi/httpclient/securehttpclientio.dart';
+import 'package:gsd_restapi/httpclient/securehttpclientio.dart';
 import 'package:http/http.dart' as http;
 
 /// Erstellt einen HTTP-Client für Mobile- und Desktop-Plattformen

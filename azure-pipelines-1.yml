@@ -43,3 +43,62 @@ stages:
                 git config --global user.name "Build Agent"
                 git push origin HEAD:$(Build.SourceBranchName) --tags
                 git push --set-upstream origin HEAD:$(Build.SourceBranchName)
+
+  - stage: PublishPackage
+    pool:
+      name: default
+      demands: Pub
+    displayName: Publish to pub.dev
+    dependsOn: VersionBump
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    jobs:
+      - job: PublishJob
+        displayName: Publish Package
+        steps:
+          - checkout: self
+            persistCredentials: true
+
+          - task: CmdLine@2
+            displayName: "Pull Latest Changes"
+            inputs:
+              script: |
+                git config --global user.email "buildAgent@gsd-software.com"
+                git config --global user.name "Build Agent"
+                git pull origin $(Build.SourceBranchName)
+
+          - task: CmdLine@2
+            displayName: "Publish to pub.dev"
+            inputs:
+              script: |
+                flutter pub publish --force
+
+  - stage: SyncGitHub
+    pool:
+      name: default
+      demands: Web
+    displayName: Sync to GitHub
+    dependsOn: PublishPackage
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    jobs:
+      - job: SyncJob
+        displayName: Sync to GitHub
+        steps:
+          - checkout: self
+            persistCredentials: true
+            fetchDepth: 0  # Fetch complete history
+
+          - task: CmdLine@2
+            displayName: "Setup Git and Force Push to GitHub"
+            env:
+              GITHUB_TOKEN: $(GITHUB_TOKEN)
+            inputs:
+              script: |
+                git config --global user.email "buildAgent@gsd-software.com"
+                git config --global user.name "Build Agent"
+                git config --global push.default simple
+                git remote remove github 2>nul || echo "Remote doesn't exist"
+                git remote add github https://$(GITHUB_TOKEN)@github.com/GSD-Software-mbH/GSD-RestAPI.git
+                git fetch --all --tags
+                git branch -a
+                git push github HEAD:main --force --tags
+                echo "Successfully force-pushed complete branch to GitHub"

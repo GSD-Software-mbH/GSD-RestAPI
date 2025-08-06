@@ -1,4 +1,4 @@
-part of 'restapi.dart';
+part of 'gsd_restapi.dart';
 
 /// Repräsentiert eine Datenbank im REST-API-Service
 /// 
@@ -10,7 +10,7 @@ part of 'restapi.dart';
 /// - RestApiCheckServiceResponse zur Service-Status-Überprüfung
 /// - Kompatibilitätsprüfungen zwischen Client und Server
 /// - Modul-Versions-Management
-class RestApiDatabase {
+class RestApiDOCUframeDatabase {
   /// Name/Alias der Datenbank
   /// 
   /// Eindeutige Identifikation der Datenbank, wird in API-Aufrufen
@@ -21,11 +21,11 @@ class RestApiDatabase {
   /// 
   /// Jedes Modul enthält Name und Versionsinformationen,
   /// die für Funktionskompatibilität wichtig sind.
-  List<RestApiModule> modules;
+  List<RestApiDOCUframeModule> modules;
 
   /// Erstellt eine neue RestApiDatabase-Instanz
   /// 
   /// [name] - Name/Alias der Datenbank
   /// [modules] - Liste der verfügbaren Module
-  RestApiDatabase(this.name, this.modules);
+  RestApiDOCUframeDatabase(this.name, this.modules);
 }

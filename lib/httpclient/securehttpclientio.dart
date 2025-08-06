@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:restapi/restapi.dart';
+import 'package:gsd_restapi/gsd_restapi.dart';
 import 'package:http/io_client.dart';
 import 'package:http/http.dart' as http;
 

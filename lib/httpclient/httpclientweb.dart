@@ -1,6 +1,6 @@
 // http_client_web.dart
 import 'package:http/http.dart' as http;
-import 'package:restapi/httpclient/securehttpclientweb.dart';
+import 'package:gsd_restapi/httpclient/securehttpclientweb.dart';
 
 /// Erstellt einen HTTP-Client für Web-Plattformen
 /// 

@@ -1,4 +1,4 @@
-part of 'restapi.dart';
+part of 'gsd_restapi.dart';
 
 /// Enum für verschiedene Gerätetypen, die mit der REST-API interagieren können
 /// 
