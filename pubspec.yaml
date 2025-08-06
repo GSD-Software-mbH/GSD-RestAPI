@@ -1,6 +1,6 @@
 name: gsd_restapi
 description: "This package provides comprehensive REST API functionality for Flutter applications with automatic session management, encryption, various HTTP methods, and Firebase Performance Monitoring. It enables structured communication with REST APIs for both debugging purposes and production monitoring."
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/GSD-Software-mbH/GSD-RestAPI
 homepage: https://gsd-software.com
 documentation: https://github.com/GSD-Software-mbH/GSD-RestAPI
