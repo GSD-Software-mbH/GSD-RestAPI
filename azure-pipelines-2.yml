@@ -1,0 +1,70 @@
+trigger:
+- none
+
+pool:
+  name: default
+
+stages:
+  - stage: ChangelogCheck
+    pool:
+      name: default
+      demands: Web
+    displayName: 'Changelog Version Check'
+    jobs:
+      - job: CheckChangelogEntry
+        displayName: 'Check Changelog Entry for Next Version'
+        steps:
+          - checkout: self
+            persistCredentials: false
+
+          - powershell: |
+              # Aktuelle Version mit cider abrufen
+              $currentVersion = & "C:\Users\buildagent\AppData\Local\Pub\Cache\bin\cider" version
+              Write-Host "Aktuelle Version (cider): $currentVersion"
+              
+              # Nächste Patch-Version berechnen
+              $versionParts = $currentVersion.Split('.')
+              $major = [int]$versionParts[0]
+              $minor = [int]$versionParts[1] 
+              $patch = [int]$versionParts[2] + 1
+              $nextVersion = "$major.$minor.$patch"
+              Write-Host "Erwartete nächste Version: $nextVersion"
+              
+              # CHANGELOG.md nach der nächsten Version durchsuchen
+              $changelogContent = Get-Content "CHANGELOG.md" -Raw
+              if ($changelogContent -match "## $nextVersion") {
+                  Write-Host "✅ CHANGELOG.md enthält einen Eintrag für Version $nextVersion" -ForegroundColor Green
+                  Write-Host "##vso[task.setvariable variable=ChangelogEntryFound]true"
+                  Write-Host "##vso[task.setvariable variable=NextVersion]$nextVersion"
+              } else {
+                  Write-Host "❌ CHANGELOG.md enthält KEINEN Eintrag für Version $nextVersion" -ForegroundColor Red
+                  Write-Host "##vso[task.setvariable variable=ChangelogEntryFound]false"
+                  Write-Host "##vso[task.setvariable variable=NextVersion]$nextVersion"
+                  
+                  Write-Host ""
+                  Write-Host "Bitte fügen Sie einen Eintrag für Version $nextVersion in CHANGELOG.md hinzu:" -ForegroundColor Yellow
+                  Write-Host "## $nextVersion" -ForegroundColor Yellow
+                  Write-Host "* Ihre Änderungen hier..." -ForegroundColor Yellow
+                  Write-Host ""
+                  
+                  # Zeige die ersten Zeilen der CHANGELOG.md zur Orientierung
+                  Write-Host "Aktuelle CHANGELOG.md Einträge:" -ForegroundColor Cyan
+                  $changelogLines = Get-Content "CHANGELOG.md" | Select-Object -First 10
+                  foreach ($line in $changelogLines) {
+                      Write-Host $line -ForegroundColor Gray
+                  }
+              }
+            displayName: 'Check for Next Version Entry in CHANGELOG.md (using cider)'
+
+          - powershell: |
+              if ($env:ChangelogEntryFound -eq "false") {
+                  Write-Host "##vso[task.logissue type=error]CHANGELOG.md muss einen Eintrag für die nächste Version enthalten!"
+                  exit 1
+              }
+            displayName: 'Fail Pipeline if Changelog Entry Missing'
+            condition: always()
+
+          - powershell: |
+              Write-Host "✅ Alle Changelog-Checks erfolgreich!" -ForegroundColor Green
+            displayName: 'Success Message'
+            condition: and(succeeded(), eq(variables['ChangelogEntryFound'], 'true'))
