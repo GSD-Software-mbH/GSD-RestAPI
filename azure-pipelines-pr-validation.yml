@@ -1,0 +1,283 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- none
+
+pool:
+  name: default
+
+stages:
+  - stage: ChangelogCheck
+    pool:
+      name: default
+      demands: Web
+    displayName: 'Changelog Version Check'
+    jobs:
+      - job: CheckChangelogEntry
+        displayName: 'Check Changelog Entry for Next Version'
+        steps:
+          - checkout: self
+            persistCredentials: false
+
+          - powershell: |
+              # Aktuelle Version mit cider abrufen
+              $currentVersion = & "C:\Users\buildagent\AppData\Local\Pub\Cache\bin\cider" version
+              Write-Host "Aktuelle Version (cider): $currentVersion"
+              
+              # Nächste Patch-Version berechnen
+              $versionParts = $currentVersion.Split('.')
+              $major = [int]$versionParts[0]
+              $minor = [int]$versionParts[1] 
+              $patch = [int]$versionParts[2] + 1
+              $nextVersion = "$major.$minor.$patch"
+              Write-Host "Erwartete nächste Version: $nextVersion"
+              
+              # CHANGELOG.md nach der nächsten Version durchsuchen
+              $changelogContent = Get-Content "CHANGELOG.md" -Raw
+              if ($changelogContent -match "## $nextVersion") {
+                  Write-Host "✅ CHANGELOG.md enthält einen Eintrag für Version $nextVersion" -ForegroundColor Green
+                  Write-Host "##vso[task.setvariable variable=ChangelogEntryFound]true"
+                  Write-Host "##vso[task.setvariable variable=NextVersion]$nextVersion"
+              } else {
+                  Write-Host "❌ CHANGELOG.md enthält KEINEN Eintrag für Version $nextVersion" -ForegroundColor Red
+                  Write-Host "##vso[task.setvariable variable=ChangelogEntryFound]false"
+                  Write-Host "##vso[task.setvariable variable=NextVersion]$nextVersion"
+                  
+                  Write-Host ""
+                  Write-Host "Bitte fügen Sie einen Eintrag für Version $nextVersion in CHANGELOG.md hinzu:" -ForegroundColor Yellow
+                  Write-Host "## $nextVersion" -ForegroundColor Yellow
+                  Write-Host "* Ihre Änderungen hier..." -ForegroundColor Yellow
+                  Write-Host ""
+                  
+                  # Zeige die ersten Zeilen der CHANGELOG.md zur Orientierung
+                  Write-Host "Aktuelle CHANGELOG.md Einträge:" -ForegroundColor Cyan
+                  $changelogLines = Get-Content "CHANGELOG.md" | Select-Object -First 10
+                  foreach ($line in $changelogLines) {
+                      Write-Host $line -ForegroundColor Gray
+                  }
+              }
+            displayName: 'Check for Next Version Entry in CHANGELOG.md (using cider)'
+
+          - powershell: |
+              if ($env:ChangelogEntryFound -eq "false") {
+                  Write-Host "##vso[task.logissue type=error]CHANGELOG.md muss einen Eintrag für die nächste Version enthalten!"
+                  exit 1
+              }
+            displayName: 'Fail Pipeline if Changelog Entry Missing'
+            condition: always()
+
+          - powershell: |
+              Write-Host "✅ Alle Changelog-Checks erfolgreich!" -ForegroundColor Green
+            displayName: 'Success Message'
+            condition: and(succeeded(), eq(variables['ChangelogEntryFound'], 'true'))
+
+  - stage: AutoFormatAndFix 
+    dependsOn: ChangelogCheck
+    pool:
+      name: default
+      demands: Web
+    displayName: Auto Format and Fix Code
+    jobs:
+      - job: AutoFormatAndFixJob
+        displayName: Auto Format and Fix Code
+        steps:
+        - checkout: self
+
+        - task: CmdLine@2
+          displayName: "Pull Latest Changes"
+          inputs:
+            script: |
+              git config --global user.email "buildAgent@gsd-software.com"
+              git config --global user.name "Build Agent"
+              git pull origin $(System.PullRequest.SourceBranch)
+
+        - task: CmdLine@2
+          displayName: "Clean project"
+          inputs:
+            script: 'flutter clean'
+            workingDirectory: '$(Build.SourcesDirectory)'
+
+        - task: CmdLine@2
+          displayName: "Resolve dependecies"
+          inputs:
+            script: 'flutter pub get'
+            workingDirectory: '$(Build.SourcesDirectory)'
+
+        - task: PowerShell@2
+          displayName: 'Apply Dart Fixes'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Host "Applying Dart fixes..."
+              dart fix --apply
+              
+              $gitStatus = git status --porcelain
+              if ($gitStatus) {
+                Write-Host "✅ Dart fixes applied, creating commit..."
+                git add .
+                git commit -m "Auto-PR-Validation: apply dart fixes [skip ci]"
+                Write-Host "##vso[task.setvariable variable=dartFixesApplied]true"
+              } else {
+                Write-Host "ℹ️ No dart fixes needed"
+                Write-Host "##vso[task.setvariable variable=dartFixesApplied]false"
+              }
+            workingDirectory: '$(Build.SourcesDirectory)'
+
+        - task: PowerShell@2
+          displayName: 'Format Code'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Host "Formatting Dart code..."
+              dart format .
+              
+              $gitStatus = git status --porcelain
+              if ($gitStatus) {
+                Write-Host "✅ Code formatting applied, creating commit..."
+                git add .
+                git commit -m "Auto-PR-Validation: format code [skip ci]"
+                Write-Host "##vso[task.setvariable variable=formattingApplied]true"
+              } else {
+                Write-Host "ℹ️ No formatting changes needed"
+                Write-Host "##vso[task.setvariable variable=formattingApplied]false"
+              }
+            workingDirectory: '$(Build.SourcesDirectory)'
+
+        - task: PowerShell@2
+          displayName: 'Push Changes if Any'
+          condition: or(eq(variables['dartFixesApplied'], 'true'), eq(variables['formattingApplied'], 'true'))
+          inputs:
+            targetType: 'inline'
+            script: |
+              $sourceBranch = "$(System.PullRequest.SourceBranch)" -replace "refs/heads/", ""
+              Write-Host "Pushing auto-format/fix changes to: $sourceBranch"
+              Write-Host "Commits to be pushed:"
+              git log --oneline HEAD~2..HEAD
+              git push origin HEAD:$sourceBranch
+              Write-Host "##vso[task.logissue type=warning]⚠️ Auto-formatting and/or dart fixes were applied. Please pull the latest changes."
+            workingDirectory: '$(Build.SourcesDirectory)'
+
+  - stage: CodeValidation
+    dependsOn: AutoFormatAndFix
+    condition: succeeded()
+    pool:
+      name: default
+      demands: Web
+    displayName: Code Validation
+    jobs:
+      - job: CodeValidationJob
+        displayName: Code Validation
+        steps:
+        - checkout: self
+
+        - task: CmdLine@2
+          displayName: "Pull Latest Changes"
+          inputs:
+            script: |
+              git config --global user.email "buildAgent@gsd-software.com"
+              git config --global user.name "Build Agent"
+              git pull origin $(System.PullRequest.SourceBranch)
+
+        - task: CmdLine@2
+          displayName: "Clean project"
+          inputs:
+            script: 'flutter clean'
+            workingDirectory: '$(Build.SourcesDirectory)'
+
+        - task: CmdLine@2
+          displayName: "Get Dependencies"
+          inputs:
+            script: 'flutter pub get'
+            workingDirectory: '$(Build.SourcesDirectory)'
+
+        - task: CmdLine@2
+          displayName: "Analyze Code"
+          inputs:
+            script: 'flutter analyze --fatal-warnings'
+            workingDirectory: '$(Build.SourcesDirectory)'
+
+        - task: PowerShell@2
+          displayName: 'Check Direct Dependencies'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Host "Checking direct dependencies..." -ForegroundColor Cyan
+              
+              try {
+                # Hole outdated dependencies als JSON
+                $outdatedOutput = flutter pub outdated --json 2>&1
+                $outdatedJson = $outdatedOutput | ConvertFrom-Json
+                
+                # Filtere nur direkte Dependencies
+                $directOutdated = $outdatedJson.packages | Where-Object { 
+                  $_.kind -eq "direct" -and $_.upgradable 
+                }
+                
+                if ($directOutdated.Count -gt 0) {
+                  Write-Host "Found $($directOutdated.Count) outdated direct dependencies:" -ForegroundColor Yellow
+                  Write-Host ""
+                  
+                  foreach ($package in $directOutdated) {
+                    $name = $package.package
+                    $current = if ($package.current) { $package.current.version } else { "Not installed" }
+                    $upgradable = $package.upgradable.version
+                    
+                    Write-Host "  ${name}: ${current} → ${upgradable}" -ForegroundColor Yellow
+                  }
+                  
+                  Write-Host ""
+                  Write-Host "##vso[task.setvariable variable=hasDirectOutdated]true"
+                  Write-Host "##vso[task.logissue type=warning]Direct dependencies need updates"
+                  
+                } else {
+                  Write-Host "✅ All direct dependencies are up to date!" -ForegroundColor Green
+                  Write-Host "##vso[task.setvariable variable=hasDirectOutdated]false"
+                }
+                
+              } catch {
+                Write-Host "Error checking dependencies: $($_.Exception.Message)" -ForegroundColor Red
+                Write-Host "##vso[task.setvariable variable=hasDirectOutdated]error"
+              }
+            workingDirectory: '$(Build.SourcesDirectory)'
+
+  - stage: UnitTest
+    dependsOn: CodeValidation
+    pool:
+      name: default
+      demands: Web
+    displayName: Unit-Test
+    jobs:
+      - job: TestJob
+        displayName: Test
+        steps:
+        - checkout: self
+
+        - task: CmdLine@2
+          displayName: "Pull Latest Changes"
+          inputs:
+            script: |
+              git config --global user.email "buildAgent@gsd-software.com"
+              git config --global user.name "Build Agent"
+              git pull origin $(System.PullRequest.SourceBranch)
+
+        - task: CmdLine@2
+          displayName: "Clean project"
+          inputs:
+            script: 'flutter clean'
+            workingDirectory: '$(Build.SourcesDirectory)'
+
+        - task: CmdLine@2
+          displayName: "Resolve dependecies"
+          inputs:
+            script: 'flutter pub get'
+            workingDirectory: '$(Build.SourcesDirectory)'
+
+        - task: CmdLine@2
+          displayName: "Run Tests"
+          inputs:
+            script: |
+              flutter test
+            workingDirectory: '$(Build.SourcesDirectory)'
