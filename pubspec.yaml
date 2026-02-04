@@ -1,0 +1,35 @@
+name: gsd_restapi
+description: "This package provides comprehensive REST API functionality for Flutter applications."
+version: 0.1.50
+repository: https://github.com/GSD-Software-mbH/GSD-RestAPI
+homepage: https://gsd-software.com
+documentation: https://github.com/GSD-Software-mbH/GSD-RestAPI
+
+environment:
+  sdk: ^3.8.1
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.4.0
+  encrypter_plus: ^5.1.0
+  iso8601_duration: ^1.2.1
+  collection: ^1.19.1
+  pointycastle: ^4.0.0
+  crypto: ^3.0.6
+  gsd_encryption: ^0.1.17
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+
+topics:
+  - rest-api
+  - http-client
+  - session-management
+  - encryption
+  - authentication

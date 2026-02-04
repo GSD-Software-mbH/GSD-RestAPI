@@ -1,0 +1,203 @@
+trigger:
+- main
+
+pool:
+  name: default
+
+stages:
+  - stage: VersionBump
+    pool:
+      name: default
+      demands: Web
+    displayName: Version Bump
+    jobs:
+      - job: VersionBumpJob
+        displayName: VersionBump
+        steps:
+          - checkout: self
+            persistCredentials: true
+
+          - task: CmdLine@2
+            displayName: "Pull Latest Changes"
+            inputs:
+              script: |
+                git config --global user.email "buildAgent@gsd-software.com"
+                git config --global user.name "Build Agent"
+                git pull origin $(Build.SourceBranchName)
+          
+          - powershell: |
+              $buildName = & "C:\Users\buildagent\AppData\Local\Pub\Cache\bin\cider" bump patch
+              Write-Host "Output from cider command: $buildName"
+              Write-Host "##vso[build.updatebuildnumber]$buildName"
+            displayName: 'Bump Version and Set Build Name'
+            condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+
+          - task: CmdLine@2
+            displayName: 'Set Git Config and Push Version Change'
+            condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+            inputs:
+              script: |
+                git commit -a -m "Vesion patch [skip ci]"
+                git tag -a $(Build.BuildNumber) -m "Version $(Build.BuildNumber)"
+                git config --global user.email "buildAgent@gsd-software.com"
+                git config --global user.name "Build Agent"
+                git push origin HEAD:$(Build.SourceBranchName) --tags
+                git push --set-upstream origin HEAD:$(Build.SourceBranchName)
+
+          - task: CopyFiles@2
+            displayName: "Copy to artifact staging directory"
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)'
+              Contents: 'README.md'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+              OverWrite: true
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'gsd-restapi'
+              publishLocation: 'Container'
+
+  - stage: PublishPackage
+    pool:
+      name: default
+      demands: Pub
+    displayName: Publish to pub.dev
+    dependsOn: VersionBump
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    jobs:
+      - job: PublishJob
+        displayName: Publish Package
+        steps:
+          - checkout: self
+            persistCredentials: true
+
+          - task: CmdLine@2
+            displayName: "Pull Latest Changes"
+            inputs:
+              script: |
+                git config --global user.email "buildAgent@gsd-software.com"
+                git config --global user.name "Build Agent"
+                git pull origin $(Build.SourceBranchName)
+
+          - task: CmdLine@2
+            displayName: "Clean project"
+            inputs:
+              script: 'flutter clean'
+
+          - task: CmdLine@2
+            displayName: "Resolve dependencies"
+            inputs:
+              script: 'flutter pub get'
+
+          - task: CmdLine@2
+            displayName: "Format Code"
+            inputs:
+              script: |
+                dart format .
+                
+          - task: CmdLine@2
+            displayName: "Publish to pub.dev"
+            inputs:
+              script: |
+                flutter pub publish --force
+
+  - stage: BuildExampleApp
+    pool:
+      name: default
+      demands: Web
+    displayName: Build Example App
+    dependsOn: PublishPackage
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    jobs:
+      - job: BuildExampleAppJob
+        displayName: Web
+        steps:
+        - checkout: self
+
+        - task: CmdLine@2
+          displayName: "Pull Latest Changes"
+          inputs:
+            script: |
+              git config --global user.email "buildAgent@gsd-software.com"
+              git config --global user.name "Build Agent"
+              git pull origin $(Build.SourceBranchName)
+
+        - task: CmdLine@2
+          displayName: "Clean project"
+          inputs:
+            script: 'flutter clean'
+            workingDirectory: '$(Build.SourcesDirectory)\example'
+
+        - task: CmdLine@2
+          displayName: "Resolve dependencies"
+          inputs:
+            script: 'flutter pub get'
+            workingDirectory: '$(Build.SourcesDirectory)\example'
+
+        - task: CmdLine@2
+          displayName: "Run build Web"
+          inputs:
+            script: 'flutter build web --release --no-tree-shake-icons'
+            workingDirectory: '$(Build.SourcesDirectory)\example'
+
+        - task: CopyFiles@2
+          displayName: "Copy to artifact staging directory"
+          inputs:
+            SourceFolder: '$(Build.SourcesDirectory)\example\build\web'
+            Contents: '**'
+            TargetFolder: '$(Build.ArtifactStagingDirectory)\web-example'
+            OverWrite: true
+
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+            ArtifactName: 'gsd-restapi'
+            publishLocation: 'Container'
+
+  - stage: SyncGitHub
+    pool:
+      name: default
+      demands: Web
+    displayName: Sync to GitHub
+    dependsOn: PublishPackage
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    jobs:
+      - job: SyncJob
+        displayName: Sync to GitHub
+        steps:
+          - checkout: self
+            persistCredentials: true
+            fetchDepth: 1
+
+          - task: CmdLine@2
+            displayName: "Sync Current Main State to GitHub (No History)"
+            env:
+              GITHUB_TOKEN: $(GITHUB_TOKEN)
+            inputs:
+              script: |
+                echo "Setting up Git configuration..."
+                git config --global user.email "info@gsd-software.com"
+                git config --global user.name "GSD Software CI/CD"
+                git config --global push.default simple
+                
+                echo "Removing existing GitHub remote and adding fresh one..."
+                git remote remove github 2>nul || echo "Remote doesn't exist"
+                git remote add github https://$(GITHUB_TOKEN)@github.com/GSD-Software-mbH/GSD-RestAPI.git
+                
+                echo "Cleaning up any existing temp branches..."
+                git branch -D temp-sync-branch 2>nul || echo "No temp branch to delete"
+                
+                echo "Creating fresh orphan branch with current main state..."
+                git checkout --orphan temp-sync-branch
+                git add -A
+                git commit -m "Sync from Azure DevOps main - Version $(Build.BuildNumber)"
+                
+                echo "Force pushing to GitHub main (replacing all history)..."
+                git push github temp-sync-branch:main --force
+                
+                echo "Cleaning up temp branch..."
+                git checkout main 2>nul || git checkout main 2>nul || echo "Staying on current branch"
+                git branch -D temp-sync-branch 2>nul || echo "Temp branch already cleaned"
+                
+                echo "Successfully synchronized Version $(Build.BuildNumber) to GitHub main (no history preserved)"
