@@ -1,0 +1,16 @@
+trigger:
+  - main
+
+resources:
+  repositories:
+    - repository: flutter_pipelines
+      type: git
+      # Format: "<AzureDevOpsProject>/<RepositoryName>"
+      name: Flutter Pipelines/Flutter Pipelines
+      
+stages:
+  - template: templates/Packages/Build/build-stages.yml@flutter_pipelines
+    parameters:
+      sourceBranch: main
+      artifactName: gsd-flutter-restapi
+
