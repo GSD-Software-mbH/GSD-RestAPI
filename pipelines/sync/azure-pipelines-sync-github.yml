@@ -1,0 +1,28 @@
+trigger: none
+pr: none
+
+resources:
+  repositories:
+    - repository: flutter_pipelines
+      type: git
+      # Format: "<AzureDevOpsProject>/<RepositoryName>"
+      name: Flutter Pipelines/Flutter Pipelines
+  pipelines:
+    - pipeline: buildUpstream
+      project: Flutter RestAPI
+      source: Build
+      trigger:
+        branches:
+          include:
+            - main
+
+variables:
+  - group: github-sync-secrets
+
+stages:
+  - template: templates/Packages/Sync/sync-github-stage.yml@flutter_pipelines
+    parameters:
+      sourceBranch: main
+      targetBranch: main
+      githubRepo: GSD-Software-mbH/GSD-RestAPI
+

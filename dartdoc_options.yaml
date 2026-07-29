@@ -1,0 +1,4 @@
+dartdoc:
+  showUndocumentedCategories: false
+  exclude:
+    - 'httpclient/**'

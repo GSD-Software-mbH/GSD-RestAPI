@@ -1,0 +1,13 @@
+trigger: none
+
+resources:
+  repositories:
+    - repository: flutter_pipelines
+      type: git
+      # Format: "<AzureDevOpsProject>/<RepositoryName>"
+      name: Flutter Pipelines/Flutter Pipelines
+
+stages:
+  - template: templates/Packages/PR/pr-code-validation-stages.yml@flutter_pipelines
+
+
