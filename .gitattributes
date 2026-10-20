@@ -1,0 +1,4 @@
+# Azure DevOps pipeline definitions require Windows line endings.
+pipelines/**/*.yml text eol=crlf
+pipelines/**/*.yaml text eol=crlf
+*.md text eol=crlf whitespace=cr-at-eol
