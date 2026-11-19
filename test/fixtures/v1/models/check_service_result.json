@@ -1,0 +1,14 @@
+{
+  "applicationName": "DOCUframe",
+  "applicationVersion": "fallback-version",
+  "webservice": {
+    "version": "2.4.0",
+    "moduleVersion": {
+      "database-a": [
+        {"moduleName": "Basis", "moduleVersion": "1.2.3"},
+        {"moduleName": "Sync"}
+      ],
+      "database-b": null
+    }
+  }
+}

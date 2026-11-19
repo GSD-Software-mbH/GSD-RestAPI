@@ -1,0 +1,719 @@
+{
+  "account.createDemoAccount": {
+    "method": "POST",
+    "path": "/dfapp/v1/DF/CreateDemoUser",
+    "query": {},
+    "body": "{\"deviceId\":null,\"password\":\"secret-pw\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "appointments.getAppointments": {
+    "method": "GET",
+    "path": "/dfapp/v1/appointments",
+    "query": {
+      "from": "2026-07-20T10:30:00.000Z",
+      "to": "2026-07-20T11:45:00.000Z",
+      "page": "2",
+      "perPage": "25",
+      "username": "demo",
+      "queryString": "",
+      "serialization": "{\"type\":\"class\",\"style\":\"preview\"}"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "appointments.patchAppointmentsCreateException": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/appointments/appointment-1/createException",
+    "query": {},
+    "body": "{\"exceptionFrom\":\"2026-07-27T10:30:00.000Z\",\"exceptionBody\":{\"from\":\"2026-07-20T10:30:00.000Z\",\"to\":\"2026-07-20T11:45:00.000Z\",\"title\":\"Ausnahme\",\"place\":\"Raum C\",\"description\":\"Verschoben\",\"owner\":\"demo\",\"remindBefore\":\"PT0H15M0S\",\"remindAt\":\"2026-07-20T10:00:00.000Z\",\"group\":false,\"attendees\":{\"users\":[\"alice\"],\"addresses\":[\"Adresse-3\"],\"emails\":[\"alice@example.test\"],\"notificationComment\":\"Ausnahme\",\"notifyAllAttendees\":true},\"isSerial\":true,\"public\":true,\"extern\":true,\"type\":4,\"occupancy\":3,\"rrule\":\"FREQ=MONTHLY\"}}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "appointments.patchAppointmentsRemoveFromSeries": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/appointments/appointment-1/removeFromSeries",
+    "query": {},
+    "body": "{\"date\":\"2026-07-20T10:30:00.000Z\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "appointments.patchAppointmentsUpdateAppointment": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/appointments/appointment-1/updateAppointment",
+    "query": {},
+    "body": "{\"from\":\"2026-07-20T10:30:00.000Z\",\"to\":\"2026-07-20T11:45:00.000Z\",\"title\":\"Geändert\",\"place\":\"Raum B\",\"description\":\"Neue Planung\",\"owner\":\"demo\",\"remindBefore\":\"PT0H15M0S\",\"remindAt\":\"2026-07-20T10:00:00.000Z\",\"wholeDay\":true,\"attendees\":{\"users\":[\"bob\"],\"addresses\":[\"Adresse-2\"],\"emails\":[\"bob@example.test\"],\"notificationComment\":\"Aktualisiert\",\"notifyAllAttendees\":true},\"isSerial\":true,\"public\":true,\"extern\":true,\"type\":3,\"occupancy\":2,\"rrule\":\"FREQ=DAILY\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "appointments.postAppointments": {
+    "method": "POST",
+    "path": "/dfapp/v1/appointments",
+    "query": {},
+    "body": "{\"from\":\"2026-07-20T10:30:00.000Z\",\"to\":\"2026-07-20T11:45:00.000Z\",\"title\":\"Besprechung\",\"place\":\"Raum A\",\"description\":\"Planung\",\"owner\":\"demo\",\"remindBefore\":\"PT0H15M0S\",\"remindAt\":\"2026-07-20T10:00:00.000Z\",\"wholeDay\":true,\"attendees\":{\"users\":[\"alice\"],\"addresses\":[\"Adresse-1\"],\"emails\":[\"alice@example.test\"],\"notificationComment\":\"Bitte teilnehmen\",\"notifyAllAttendees\":true},\"type\":2,\"occupancy\":1,\"isSerial\":true,\"public\":true,\"extern\":true,\"rrule\":\"FREQ=WEEKLY\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "appointments.postAppointmentsInvitation": {
+    "method": "POST",
+    "path": "/dfapp/v1/appointments/appointment-1/invitation/decline",
+    "query": {},
+    "body": "{\"deleteAppointment\":true}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "appointments.postAppointmentsNextFreeDate": {
+    "method": "POST",
+    "path": "/dfapp/v1/appointments/nextFreeDate",
+    "query": {},
+    "body": "{\"from\":\"2026-07-20T10:30:00.000Z\",\"to\":\"2026-07-20T11:45:00.000Z\",\"searchArea\":\"2026-07-27T00:00:00.000Z\",\"users\":[\"alice\",\"bob\"]}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "folders.deleteFolders": {
+    "method": "DELETE",
+    "path": "/dfapp/v1/folders",
+    "query": {
+      "path": "/Temp",
+      "notEmpty": "true"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "folders.getFolderByOid": {
+    "method": "GET",
+    "path": "/dfapp/v1/folders/oid/folder-1",
+    "query": {
+      "reverseOrder": "true",
+      "page": "2",
+      "perPage": "25",
+      "query": "urgent"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "folders.getFolderByPath": {
+    "method": "GET",
+    "path": "/dfapp/v1/folders/path/%5CProjekte%5C2026",
+    "query": {
+      "reverseOrder": "true",
+      "page": "2",
+      "perPage": "25",
+      "query": "urgent"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "folders.getFolderByType": {
+    "method": "GET",
+    "path": "/dfapp/v1/folders/type/Inbox",
+    "query": {
+      "reverseOrder": "true",
+      "perPage": "25",
+      "page": "2",
+      "query": "urgent"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "folders.patchFoldersAdd": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/folders/add/path/%5CInbox%20A",
+    "query": {
+      "class": "Dokument"
+    },
+    "body": "{\"documents\":[\"doc-1\",\"doc-2\"]}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "folders.patchFoldersCopyDocuments": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/folders/copyDocuments",
+    "query": {},
+    "body": "{\"destinationFolderSourceType\":\"path\",\"destinationFolder\":\"/Target\",\"sourceFolderSourceType\":\"oid\",\"sourceFolder\":\"\",\"documents\":[\"doc-1\"],\"cut\":false}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "folders.patchFoldersRemoveDocuments": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/folders/remove/oid/folder-1",
+    "query": {
+      "class": "Dokument"
+    },
+    "body": "{\"documents\":[\"doc-1\"],\"moveToTrashBin\":false,\"deep\":[\"nested\"]}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "folders.patchFoldersRename": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/folders/rename/folder-1",
+    "query": {},
+    "body": "{\"folderName\":\"Renamed\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "folders.postFolders": {
+    "method": "POST",
+    "path": "/dfapp/v1/folders",
+    "query": {},
+    "body": "{\"folderName\":\"Child\",\"parentFolder\":\"parent-1\",\"parentFolderSourceType\":\"oid\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.getMailAccounts": {
+    "method": "GET",
+    "path": "/dfapp/v1/mail/accounts",
+    "query": {},
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.getUserEmailSignatures": {
+    "method": "GET",
+    "path": "/dfapp/v1/userEmailSignatures",
+    "query": {},
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.patchMail": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/mail",
+    "query": {
+      "actions": "[{\"type\":\"x\"}]"
+    },
+    "body": "{\"~UUID\":\"uuid-2\",\"~ObjectID\":\"oid-2\",\"from\":\"demo\",\"to\":[\"a@example.test\"],\"cc\":[\"c@example.test\"],\"bcc\":[\"b@example.test\"],\"name\":\"Name\",\"description\":\"Beschreibung\",\"subject\":\"Betreff\",\"htmlContent\":\"<p>Hi</p>\",\"plainContent\":\"Hi\",\"templateData\":{\"greeting\":\"Hallo\"},\"attachments\":[{\"name\":\"a.pdf\",\"oid\":\"file-1\"}],\"acknowledgementRequired\":true,\"convertImageDataSrcToFileSrc\":true,\"keepCalendar\":true,\"startTime\":\"2026-07-21T09:00:00.000Z\",\"priority\":{\"priorityValue\":2,\"priorityText\":\"low\"}}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.patchMail (Defaults)": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/mail",
+    "query": {},
+    "body": "{\"from\":\"-\",\"name\":\"-\",\"description\":\"-\",\"subject\":\"-\",\"htmlContent\":\"-\",\"plainContent\":\"-\",\"acknowledgementRequired\":false,\"convertImageDataSrcToFileSrc\":false,\"keepCalendar\":false,\"priority\":{\"priorityValue\":3,\"priorityText\":\"normal\"}}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.postMail": {
+    "method": "POST",
+    "path": "/dfapp/v1/mail",
+    "query": {
+      "action": "sendObject",
+      "actions": "[{\"type\":\"sendObject\"}]",
+      "serialization": "{\"type\":\"class\"}"
+    },
+    "body": "{\"~UUID\":\"uuid-1\",\"from\":\"demo\",\"to\":[\"a@example.test\"],\"cc\":[\"c@example.test\"],\"bcc\":[\"b@example.test\"],\"name\":\"Name\",\"description\":\"Beschreibung\",\"subject\":\"Betreff\",\"htmlContent\":\"<p>Hi</p>\",\"plainContent\":\"Hi\",\"template\":\"tpl-1\",\"templateData\":{\"greeting\":\"Hallo\"},\"attachments\":[{\"name\":\"a.pdf\",\"oid\":\"file-1\"}],\"acknowledgementRequired\":true,\"keepCalendar\":true,\"startTime\":\"2026-07-21T09:00:00.000Z\",\"assignAddresses\":true,\"assignProjects\":true,\"assignProducts\":true,\"assignContacts\":true,\"assignActions\":true,\"sendAssignReceiver\":true}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.postMail (Defaults, keine optionalen Felder)": {
+    "method": "POST",
+    "path": "/dfapp/v1/mail",
+    "query": {},
+    "body": "{\"~UUID\":\"\",\"from\":\"-\",\"name\":\"-\",\"description\":\"-\",\"subject\":\"-\",\"htmlContent\":\"-\",\"plainContent\":\"-\",\"acknowledgementRequired\":false,\"keepCalendar\":false,\"assignAddresses\":false,\"assignProjects\":false,\"assignProducts\":false,\"assignContacts\":false,\"assignActions\":false,\"sendAssignReceiver\":false}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.postMailForward": {
+    "method": "POST",
+    "path": "/dfapp/v1/mail/forward/source-3",
+    "query": {
+      "action": "forward",
+      "actions": "[{\"type\":\"forward\"}]",
+      "serialization": "{\"type\":\"class\"}"
+    },
+    "body": "{\"~UUID\":\"uuid-6\",\"~ObjectID\":\"oid-6\",\"from\":\"demo\",\"to\":[\"a@example.test\"],\"cc\":[\"c@example.test\"],\"bcc\":[\"b@example.test\"],\"name\":\"-\",\"description\":\"-\",\"subject\":\"Betreff\",\"htmlContent\":\"<p>Hi</p>\",\"plainContent\":\"Hi\",\"template\":\"tpl-6\",\"templateData\":{\"greeting\":\"Hallo\"},\"attachments\":[{\"name\":\"a.pdf\",\"oid\":\"file-1\"}],\"acknowledgementRequired\":true,\"keepCalendar\":true,\"startTime\":\"2026-07-21T09:00:00.000Z\",\"priority\":{\"priorityValue\":3,\"priorityText\":\"normal\"},\"assignAddresses\":true,\"assignProjects\":true,\"assignProducts\":true,\"assignContacts\":true,\"assignActions\":true,\"sendAssignReceiver\":true}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.postMailForward (Defaults)": {
+    "method": "POST",
+    "path": "/dfapp/v1/mail/forward/source-3",
+    "query": {},
+    "body": "{\"~UUID\":\"\",\"~ObjectID\":\"\",\"from\":\"-\",\"name\":\"-\",\"description\":\"-\",\"subject\":\"-\",\"htmlContent\":\"-\",\"plainContent\":\"-\",\"acknowledgementRequired\":false,\"keepCalendar\":false,\"priority\":{\"priorityValue\":3,\"priorityText\":\"normal\"},\"assignAddresses\":false,\"assignProjects\":false,\"assignProducts\":false,\"assignContacts\":false,\"assignActions\":false,\"sendAssignReceiver\":false}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.postMailReply": {
+    "method": "POST",
+    "path": "/dfapp/v1/mail/reply/source-1",
+    "query": {
+      "action": "reply",
+      "actions": "[{\"type\":\"reply\"}]",
+      "serialization": "{\"type\":\"class\"}"
+    },
+    "body": "{\"~UUID\":\"uuid-4\",\"~ObjectID\":\"oid-4\",\"from\":\"demo\",\"to\":\"a@example.test\",\"cc\":\"c@example.test\",\"bcc\":\"b@example.test\",\"name\":\"Name\",\"description\":\"Beschreibung\",\"subject\":\"Betreff\",\"htmlContent\":\"<p>Hi</p>\",\"plainContent\":\"Hi\",\"template\":\"tpl-4\",\"templateData\":{\"greeting\":\"Hallo\"},\"attachments\":[{\"name\":\"a.pdf\",\"oid\":\"file-1\"}],\"acknowledgementRequired\":true,\"keepCalendar\":true,\"startTime\":\"2026-07-21T09:00:00.000Z\",\"priority\":{\"priorityValue\":1,\"priorityText\":\"high\"},\"assignAddresses\":true,\"assignProjects\":true,\"assignProducts\":true,\"assignContacts\":true,\"assignActions\":true,\"sendAssignReceiver\":true}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.postMailReply (Defaults)": {
+    "method": "POST",
+    "path": "/dfapp/v1/mail/reply/source-1",
+    "query": {},
+    "body": "{\"~UUID\":\"\",\"~ObjectID\":\"\",\"from\":\"-\",\"to\":\"-\",\"cc\":\"-\",\"bcc\":\"-\",\"name\":\"-\",\"description\":\"-\",\"subject\":\"-\",\"htmlContent\":\"-\",\"plainContent\":\"-\",\"acknowledgementRequired\":false,\"keepCalendar\":false,\"priority\":{\"priorityValue\":3,\"priorityText\":\"normal\"},\"assignAddresses\":false,\"assignProjects\":false,\"assignProducts\":false,\"assignContacts\":false,\"assignActions\":false,\"sendAssignReceiver\":false}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.postMailReplyAll": {
+    "method": "POST",
+    "path": "/dfapp/v1/mail/replyAll/source-2",
+    "query": {
+      "action": "replyAll",
+      "actions": "[{\"type\":\"replyAll\"}]",
+      "serialization": "{\"type\":\"class\"}"
+    },
+    "body": "{\"~UUID\":\"uuid-5\",\"~ObjectID\":\"oid-5\",\"from\":\"demo\",\"to\":\"a@example.test\",\"cc\":\"c@example.test\",\"bcc\":\"b@example.test\",\"name\":\"-\",\"description\":\"-\",\"subject\":\"Betreff\",\"htmlContent\":\"<p>Hi</p>\",\"plainContent\":\"Hi\",\"template\":\"tpl-5\",\"templateData\":{\"greeting\":\"Hallo\"},\"attachments\":[{\"name\":\"a.pdf\",\"oid\":\"file-1\"}],\"acknowledgementRequired\":true,\"keepCalendar\":true,\"startTime\":\"2026-07-21T09:00:00.000Z\",\"priority\":{\"priorityValue\":3,\"priorityText\":\"normal\"},\"assignAddresses\":true,\"assignProjects\":true,\"assignProducts\":true,\"assignContacts\":true,\"assignActions\":true,\"sendAssignReceiver\":true}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.postMailReplyAll (Defaults)": {
+    "method": "POST",
+    "path": "/dfapp/v1/mail/replyAll/source-2",
+    "query": {},
+    "body": "{\"~UUID\":\"\",\"~ObjectID\":\"\",\"from\":\"-\",\"to\":\"-\",\"cc\":\"-\",\"bcc\":\"-\",\"name\":\"-\",\"description\":\"-\",\"subject\":\"-\",\"htmlContent\":\"-\",\"plainContent\":\"-\",\"acknowledgementRequired\":false,\"keepCalendar\":false,\"priority\":{\"priorityValue\":3,\"priorityText\":\"normal\"},\"assignAddresses\":false,\"assignProjects\":false,\"assignProducts\":false,\"assignContacts\":false,\"assignActions\":false,\"sendAssignReceiver\":false}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.postMailSend": {
+    "method": "POST",
+    "path": "/dfapp/v1/mail/send",
+    "query": {
+      "action": "sendObject",
+      "actions": "[{\"type\":\"sendObject\"}]"
+    },
+    "body": "{\"~UUID\":\"uuid-3\",\"~ObjectID\":\"oid-3\",\"from\":\"demo\",\"to\":[\"a@example.test\"],\"cc\":[\"c@example.test\"],\"bcc\":[\"b@example.test\"],\"name\":\"Name\",\"description\":\"Beschreibung\",\"subject\":\"Betreff\",\"htmlContent\":\"<p>Hi</p>\",\"plainContent\":\"Hi\",\"template\":\"tpl-3\",\"templateData\":{\"greeting\":\"Hallo\"},\"attachments\":[{\"name\":\"a.pdf\",\"oid\":\"file-1\"}],\"acknowledgementRequired\":true,\"convertImageDataSrcToFileSrc\":true,\"keepCalendar\":true,\"sendAssignReceiver\":true,\"startTime\":\"2026-07-21T09:00:00.000Z\",\"priority\":{\"priorityValue\":1,\"priorityText\":\"high\"}}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.postMailSend (Defaults)": {
+    "method": "POST",
+    "path": "/dfapp/v1/mail/send",
+    "query": {},
+    "body": "{\"~UUID\":\"\",\"~ObjectID\":\"\",\"from\":\"-\",\"name\":\"-\",\"description\":\"-\",\"subject\":\"-\",\"htmlContent\":\"-\",\"plainContent\":\"-\",\"acknowledgementRequired\":false,\"convertImageDataSrcToFileSrc\":false,\"keepCalendar\":false,\"sendAssignReceiver\":false,\"priority\":{\"priorityValue\":3,\"priorityText\":\"normal\"}}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "mail.saveMailAttachmentsToDatabase": {
+    "method": "POST",
+    "path": "/dfapp/v1/mail/saveAttachmentsToDB/mail-oid-1",
+    "query": {},
+    "body": "{\"saveAll\":true,\"extractSingularZipFile\":true,\"indices\":[0,2,5]}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "messages.patchMessage": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/message/msg-1",
+    "query": {
+      "serialization": "{\"type\":\"class\"}",
+      "rightsControlKey": "rck-3"
+    },
+    "body": "{\"toUsers\":[\"alice\",\"bob\"],\"text\":\"Aktualisiert\",\"~UUID\":\"uuid-3\",\"name\":\"Titel\",\"description\":\"Beschreibung\",\"addToIncomingFolder\":true,\"originalOid\":\"orig-3\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "messages.patchMessage (Defaults)": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/message/msg-1",
+    "query": {},
+    "body": "{\"toUsers\":[\"alice\"],\"text\":\"Text\",\"addToIncomingFolder\":true}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "messages.patchMessageSend": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/message/send/msg-2",
+    "query": {
+      "serialization": "{\"type\":\"class\"}",
+      "rightsControlKey": "rck-4"
+    },
+    "body": "{\"toUsers\":[\"alice\",\"bob\"],\"text\":\"Final\",\"~UUID\":\"uuid-4\",\"name\":\"Titel\",\"description\":\"Beschreibung\",\"addToIncomingFolder\":true,\"originalOid\":\"orig-4\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "messages.patchMessageSend (Defaults)": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/message/send/msg-2",
+    "query": {},
+    "body": "{\"toUsers\":[\"alice\"],\"text\":\"Text\",\"addToIncomingFolder\":true}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "messages.postMessage": {
+    "method": "POST",
+    "path": "/dfapp/v1/message",
+    "query": {
+      "serialization": "{\"type\":\"class\"}",
+      "actions": "[{\"type\":\"x\"}]",
+      "rightsControlKey": "rck-1"
+    },
+    "body": "{\"toUsers\":[\"alice\",\"bob\"],\"text\":\"Hallo Welt\",\"~UUID\":\"uuid-1\",\"name\":\"Titel\",\"description\":\"Beschreibung\",\"addToIncomingFolder\":true,\"originalOid\":\"orig-1\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "messages.postMessage (Defaults, addToIncomingFolder bewusst false)": {
+    "method": "POST",
+    "path": "/dfapp/v1/message",
+    "query": {},
+    "body": "{\"toUsers\":[\"alice\"],\"text\":\"Nur Text\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "messages.postMessageSend": {
+    "method": "POST",
+    "path": "/dfapp/v1/message/send",
+    "query": {
+      "serialization": "{\"type\":\"class\"}",
+      "actions": "[{\"type\":\"y\"}]",
+      "rightsControlKey": "rck-2"
+    },
+    "body": "{\"toUsers\":[\"alice\",\"bob\"],\"text\":\"Sende sofort\",\"~UUID\":\"uuid-2\",\"name\":\"Titel\",\"description\":\"Beschreibung\",\"addToIncomingFolder\":true,\"originalOid\":\"orig-2\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "messages.postMessageSend (Defaults)": {
+    "method": "POST",
+    "path": "/dfapp/v1/message/send",
+    "query": {},
+    "body": "{\"toUsers\":[\"alice\"],\"text\":\"Text\",\"addToIncomingFolder\":true}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "models.getExtModelIndexes": {
+    "method": "GET",
+    "path": "/dfapp/v1/extModel/indexes",
+    "query": {
+      "classes": "Vorgang,Adresse",
+      "rightsControlKey": "rck-3"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "models.getExtModelML (Defaults, bodyClasses null -> GET ohne Body)": {
+    "method": "GET",
+    "path": "/dfapp/v1/extModel/ml",
+    "query": {},
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "models.getExtModelML (GET, nur headerClasses)": {
+    "method": "GET",
+    "path": "/dfapp/v1/extModel/ml",
+    "query": {
+      "ml": "[\"Vorgang\"]",
+      "skipMembers": "true"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "models.getExtModelML (POST, mit bodyClasses)": {
+    "method": "POST",
+    "path": "/dfapp/v1/extModel/ml",
+    "query": {
+      "ml": "[\"Vorgang\"]",
+      "skipMembers": "true"
+    },
+    "body": "{\"ml\":[\"Adresse\",\"Projekt\"]}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "models.getExtModelStructure": {
+    "method": "GET",
+    "path": "/dfapp/v1/extModel/structure",
+    "query": {
+      "classes": "Vorgang",
+      "baseClasses": "Basis",
+      "skipMembers": "true",
+      "rightsControlKey": "rck-2"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "models.getModelDict": {
+    "method": "GET",
+    "path": "/dfapp/v1/model/dict",
+    "query": {
+      "dict": "status_labels",
+      "langID": "de-DE",
+      "rightsControlKey": "rck-4"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "models.getModelDict (Defaults, nur dict)": {
+    "method": "GET",
+    "path": "/dfapp/v1/model/dict",
+    "query": {
+      "dict": "status_labels"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "models.getModelStructure (Defaults)": {
+    "method": "GET",
+    "path": "/dfapp/v1/model/structure",
+    "query": {},
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "models.getModelStructure (baseClasses/skipMembers werden ignoriert)": {
+    "method": "GET",
+    "path": "/dfapp/v1/model/structure",
+    "query": {
+      "classes": "Vorgang,Adresse",
+      "rightsControlKey": "rck-1"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "objects.deleteObject": {
+    "method": "DELETE",
+    "path": "/dfapp/v1/object/object-1",
+    "query": {
+      "actions": "[{\"type\":\"notify\"}]",
+      "moveToRecycler": "true"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "objects.getIncidentTree": {
+    "method": "GET",
+    "path": "/dfapp/v1/incidentTree/incident-1",
+    "query": {
+      "deepLevel": "3",
+      "serialization": "{\"children\":true}",
+      "rightsControlKey": "rights-1"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "objects.getLockObject": {
+    "method": "GET",
+    "path": "/dfapp/v1/lock/object/object-1",
+    "query": {},
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "objects.getObject": {
+    "method": "GET",
+    "path": "/dfapp/v1/object/object-1",
+    "query": {
+      "class": "Vorgang",
+      "serialization": "{\"mode\":\"full\"}"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "objects.getObjects": {
+    "method": "GET",
+    "path": "/dfapp/v1/objects/Vorgang",
+    "query": {
+      "query": "status:open",
+      "page": "2",
+      "perPage": "25",
+      "serialization": "{\"mode\":\"list\"}",
+      "actions": "[{\"type\":\"preview\"}]",
+      "rightsControlKey": "rights-1"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "objects.patchObject": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/object/object-1",
+    "query": {
+      "storeMode": "10",
+      "storeSecurityPolice": "20",
+      "actions": "[{\"type\":\"notify\"}]",
+      "serialization": "{\"mode\":\"full\"}",
+      "rightsControlKey": "rights-1"
+    },
+    "body": "{\"name\":\"Geändert\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "objects.patchObjects": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/objects/Vorgang",
+    "query": {
+      "query": "status:open",
+      "actions": "[{\"type\":\"notify\"}]",
+      "serialization": "{\"mode\":\"list\"}",
+      "rightsControlKey": "rights-1",
+      "storeSecurityPolice": "20",
+      "storeMode": "10"
+    },
+    "body": "{\"status\":\"closed\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "objects.postAction": {
+    "method": "POST",
+    "path": "/dfapp/v1/action/Vorgang",
+    "query": {
+      "query": "{\"oids\":[\"object-1\"]}",
+      "page": "3",
+      "perPage": "10",
+      "serialization": "{\"mode\":\"full\"}",
+      "actions": "[{\"type\":\"sendObject\"}]",
+      "rightsControlKey": "rights-1"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "objects.postObject": {
+    "method": "POST",
+    "path": "/dfapp/v1/object/Vorgang",
+    "query": {
+      "storeMode": "10",
+      "actions": "[{\"type\":\"notify\"}]",
+      "serialization": "{\"mode\":\"full\"}",
+      "rightsControlKey": "rights-1"
+    },
+    "body": "{\"name\":\"Neu\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "objects.setObjectSecurity": {
+    "method": "POST",
+    "path": "/dfapp/v1/setObjectSecurity/object-1",
+    "query": {},
+    "body": "{\"security\":[{\"userObjectName\":\"alice\",\"rights\":7},{\"userObjectName\":\"bob\",\"rights\":15}],\"replace\":true}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "personal.getPersonalMyTasks": {
+    "method": "GET",
+    "path": "/dfapp/v1/personal/myTasks",
+    "query": {},
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "personal.getPersonalUnreadDocuments": {
+    "method": "GET",
+    "path": "/dfapp/v1/personal/unreadDocuments",
+    "query": {},
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "personal.patchPersonalEmptyRecycleBin": {
+    "method": "PATCH",
+    "path": "/dfapp/v1/personal/emptyRecycleBin",
+    "query": {},
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "settings.getUserSystemSettings": {
+    "method": "GET",
+    "path": "/dfapp/v1/userSystemSettings",
+    "query": {
+      "eventMacroName": "myEvent"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "settings.getUserSystemSettings (Defaults)": {
+    "method": "GET",
+    "path": "/dfapp/v1/userSystemSettings",
+    "query": {},
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "settings.postUserSettings": {
+    "method": "POST",
+    "path": "/dfapp/v1/userSetting/dashboard",
+    "query": {},
+    "body": "{\"theme\":\"dark\",\"columns\":3}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "time_recording.getPZEWorkingTimeAccounts": {
+    "method": "GET",
+    "path": "/dfapp/v1/pze/workingTimeAccounts",
+    "query": {
+      "serialization": "{\"type\":\"class\"}",
+      "employeeOid": "emp-1",
+      "from": "2026-06-01T00:00:00.000Z",
+      "to": "2026-06-30T00:00:00.000Z"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "time_recording.getPZEWorkingTimeAccounts (Defaults)": {
+    "method": "GET",
+    "path": "/dfapp/v1/pze/workingTimeAccounts",
+    "query": {},
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "time_recording.getPZEWorkingTimeKeys": {
+    "method": "GET",
+    "path": "/dfapp/v1/pze/workingTimeKeys",
+    "query": {
+      "serialization": "{\"type\":\"class\"}"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "time_recording.postPZEClockIn": {
+    "method": "POST",
+    "path": "/dfapp/v1/pze/clockIn",
+    "query": {},
+    "body": "{\"employeeoid\":\"emp-1\",\"key\":\"PROJEKT_A\"}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "time_recording.postPZEClockIn (Defaults, leerer Body {})": {
+    "method": "POST",
+    "path": "/dfapp/v1/pze/clockIn",
+    "query": {},
+    "body": "{}",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "time_recording.postPZEClockOut": {
+    "method": "POST",
+    "path": "/dfapp/v1/pze/clockOut",
+    "query": {
+      "employeeoid": "emp-1"
+    },
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  },
+  "time_recording.postPZEClockOut (Defaults, kein Query)": {
+    "method": "POST",
+    "path": "/dfapp/v1/pze/clockOut",
+    "query": {},
+    "body": "",
+    "sessionid": "V1-SESSION",
+    "appkey": "TEST-APP-KEY"
+  }
+}

@@ -1,0 +1,88 @@
+import 'package:gsd_restapi/src/models/gsd_api_version.dart';
+import 'package:gsd_restapi/src/runtime/api_request.dart';
+import 'package:meta/meta.dart';
+
+/// Einzige Quelle darüber, ob ein Endpunkt grundsätzlich in einen
+/// `v1/multi`-Request eintreten darf.
+///
+/// Native Endpoints deklarieren ihre Multi-Eignung NICHT mehr selbst (siehe
+/// `ApiRequest`) - stattdessen entscheidet diese zentrale Klasse ANHAND DES
+/// [ApiRequestTarget] abschließend, ob überhaupt gepuffert werden darf. Ein
+/// No-Buffer-Zone-Scope (`RuntimeExecutionContext.runWithoutBuffering`) kann
+/// Buffering danach zusätzlich abschalten, aber NIE einen hier
+/// ausgeschlossenen Endpunkt bufferbar machen.
+///
+/// Ausgeschlossen sind:
+/// - [ApiRequestTarget.unversioned] - `_CheckSession`/`_CheckService` sind
+///   die einzigen unversionierten Routen und laufen immer direkt.
+/// - [ApiRequestTarget.versioned] mit: `_CheckSession`/`_CheckService` (auch
+///   wenn ein Aufrufer sie fälschlich versioniert anfragt), jeder Pfad einer
+///   anderen Version als `GsdApiVersion.v1` (siehe unten), `v1/logout`,
+///   `v1/xSync` (Präfix, siehe unten), `v1/uploadFile`, `v1/file/...` und
+///   `v1/preview/...` (Multipart-/Binär-Downloads/-Uploads).
+///
+/// Die Versionsprüfung ist bewusst als ALLOWLIST (nur `GsdApiVersion.v1`) und
+/// nicht als Denylist einzelner Versionen formuliert: Die Bündelung läuft
+/// über den `v1/multi`-Endpunkt und ist damit ausschließlich für V1-Pfade
+/// definiert. Jede künftige Version ist so per Default sicher
+/// ausgeschlossen, statt still in Multi-Requests zu rutschen.
+///
+/// `/xSync` wird per PRÄFIX geprüft (`/xSync` oder `/xSync/...`), NICHT per
+/// Exact-Match: Der Legacy-Manager verglich exakt `/v1/xSync`, was auf reale
+/// Pfade wie `/v1/xSync/ClassInfo/App1` nie zutraf - dieser Bug wird hier
+/// bewusst NICHT kopiert. Ähnlich benannte, aber andere Pfade wie
+/// `/xSyncArchive/...` bleiben davon unberührt (kein Präfix-Treffer, da kein
+/// `/` unmittelbar nach `xSync` folgt).
+///
+/// Raw-Ausführungen (`GsdRawApi`) werden NICHT über diese Klasse ausgeschlossen
+/// - sie laufen stattdessen immer über eine interne No-Buffer-Runtime-Grenze
+/// (`RuntimeExecutionContext.runWithoutBuffering`), da derselbe Pfad über
+/// einen nativen Endpoint durchaus multi-fähig sein kann.
+@internal
+abstract final class MultiRequestEligibility {
+  static bool allows({required ApiRequestTarget target}) {
+    return switch (target) {
+      UnversionedApiRequestTarget() => false,
+      VersionedApiRequestTarget(:final version, :final path) =>
+        _allowsVersioned(version, path),
+    };
+  }
+
+  static bool _allowsVersioned(GsdApiVersion version, String path) {
+    final normalizedPath = _normalize(path);
+
+    if (normalizedPath == '/_CheckSession' ||
+        normalizedPath == '/_CheckService') {
+      return false;
+    }
+
+    if (version != GsdApiVersion.v1) {
+      return false;
+    }
+
+    if (normalizedPath == '/logout') {
+      return false;
+    }
+    if (normalizedPath == '/xSync' || normalizedPath.startsWith('/xSync/')) {
+      return false;
+    }
+    if (normalizedPath == '/uploadFile' ||
+        normalizedPath.startsWith('/uploadFile/')) {
+      return false;
+    }
+    if (normalizedPath == '/file' || normalizedPath.startsWith('/file/')) {
+      return false;
+    }
+    if (normalizedPath == '/preview' ||
+        normalizedPath.startsWith('/preview/')) {
+      return false;
+    }
+
+    return true;
+  }
+
+  static String _normalize(String path) {
+    final withoutQuery = path.split('?').first.split('#').first;
+    return withoutQuery.startsWith('/') ? withoutQuery : '/$withoutQuery';
+  }
+}

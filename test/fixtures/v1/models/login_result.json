@@ -1,0 +1,23 @@
+{
+  "sessionId": "S-1",
+  "acls": {
+    "~Count": 2,
+    "~Elements": [
+      {
+        "Oid": "ACL-1",
+        "Status": 1,
+        "UserName": "tester",
+        "DeviceID": "device-1",
+        "LicenseKey": "KEY-1",
+        "LicenseLevel": "full",
+        "ParallelConnections": 2,
+        "TFAActivated": true,
+        "TFAConfirmed": false,
+        "Application": "GSD-DFApp",
+        "AddOns": {"~Count": 1, "~Elements": ["Sync"]}
+      },
+      null
+    ]
+  },
+  "user": {"~ObjectID": "U-1", "Name": "tester"}
+}

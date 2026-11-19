@@ -1,0 +1,11 @@
+{
+  "autoDocReadOnOpen": true,
+  "noPromptInsertNewDocsUserFolders": true,
+  "noPromptInsertNewDocsGlobalFolders": true,
+  "dateDefaultReminderTimeSpan": "PT15M",
+  "userRights": 7,
+  "nextNewDocumentsCount": "3",
+  "missedCallsCount": 2,
+  "dateUserObjectName": "Team",
+  "eventSettings": {"onOpen": "Macro1"}
+}

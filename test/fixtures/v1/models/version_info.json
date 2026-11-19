@@ -1,0 +1,7 @@
+{
+  "webserviceVersion": "5.6.7",
+  "structureChangeDate": "2026-07-20T10:30:00.000Z",
+  "listOfModules": [
+    {"moduleName": "Customizing", "moduleVersion": "3.2.1"}
+  ]
+}

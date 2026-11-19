@@ -1,0 +1,65 @@
+/// Dart-Client für die DOCUframe-REST-API.
+///
+/// Einstieg ist [GsdApiClient] mit den Gruppen `v1`, `v3` und `raw`.
+library;
+
+import 'package:gsd_restapi/src/client/gsd_api_client.dart' show GsdApiClient;
+
+export 'package:gsd_restapi/src/client/gsd_api_client.dart';
+export 'package:gsd_restapi/src/client/gsd_api_config.dart';
+export 'package:gsd_restapi/src/client/gsd_request_priority.dart';
+export 'package:gsd_restapi/src/client/gsd_runtime_settings.dart';
+export 'package:gsd_restapi/src/exceptions/gsd_api_exception.dart';
+export 'package:gsd_restapi/src/models/gsd_acl_entry.dart';
+export 'package:gsd_restapi/src/models/gsd_api_version.dart';
+export 'package:gsd_restapi/src/models/gsd_check_service_result.dart';
+export 'package:gsd_restapi/src/models/gsd_docuframe_database.dart';
+export 'package:gsd_restapi/src/models/gsd_docuframe_device.dart';
+export 'package:gsd_restapi/src/models/gsd_docuframe_device_type.dart';
+export 'package:gsd_restapi/src/models/gsd_docuframe_folder_type.dart';
+export 'package:gsd_restapi/src/models/gsd_docuframe_module.dart';
+export 'package:gsd_restapi/src/models/gsd_file_download.dart';
+export 'package:gsd_restapi/src/models/gsd_file_upload_controller.dart';
+export 'package:gsd_restapi/src/models/gsd_http_method.dart';
+export 'package:gsd_restapi/src/models/gsd_http_metric.dart';
+export 'package:gsd_restapi/src/models/gsd_login_result.dart';
+export 'package:gsd_restapi/src/models/gsd_object_lock.dart';
+export 'package:gsd_restapi/src/models/gsd_sync_container.dart';
+export 'package:gsd_restapi/src/models/gsd_sync_data_class.dart';
+export 'package:gsd_restapi/src/models/gsd_sync_objects_result.dart';
+export 'package:gsd_restapi/src/models/gsd_two_factor_secret.dart';
+export 'package:gsd_restapi/src/models/gsd_two_factor_status.dart';
+export 'package:gsd_restapi/src/models/gsd_two_factor_token_provider.dart';
+export 'package:gsd_restapi/src/models/gsd_upload_file.dart';
+export 'package:gsd_restapi/src/models/gsd_user_system_settings.dart';
+export 'package:gsd_restapi/src/models/gsd_version_info.dart';
+export 'package:gsd_restapi/src/models/v3/gsd_objects_by_id_request.dart';
+export 'package:gsd_restapi/src/models/v3/gsd_objects_by_parent_request.dart';
+export 'package:gsd_restapi/src/models/v3/gsd_objects_by_query_request.dart';
+export 'package:gsd_restapi/src/models/v3/gsd_structure_request.dart';
+export 'package:gsd_restapi/src/models/v3/gsd_view_action_request.dart';
+export 'package:gsd_restapi/src/models/v3/gsd_view_load_request.dart';
+export 'package:gsd_restapi/src/raw/gsd_raw_api.dart';
+export 'package:gsd_restapi/src/raw/gsd_raw_api_response.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_account_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_appointments_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_authentication_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_documents_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_folders_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_integrations_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_mail_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_messages_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_models_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_objects_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_personal_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_service_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_settings_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_time_recording_api.dart';
+export 'package:gsd_restapi/src/v1/gsd_v1_x_sync_api.dart';
+export 'package:gsd_restapi/src/v3/gsd_v3_api.dart';
+export 'package:gsd_restapi/src/v3/gsd_v3_file_api.dart';
+export 'package:gsd_restapi/src/v3/gsd_v3_model_api.dart';
+export 'package:gsd_restapi/src/v3/gsd_v3_object_data_api.dart';
+export 'package:gsd_restapi/src/v3/gsd_v3_system_api.dart';
+export 'package:gsd_restapi/src/v3/gsd_v3_view_api.dart';

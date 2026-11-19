@@ -1,0 +1,24 @@
+{
+  "allContainers": ["c1", "c2"],
+  "c1": {
+    "containerId": "c1",
+    "contentId": "content-1",
+    "readOnly": true,
+    "count": 1,
+    "revision": "5",
+    "startMarker": 0,
+    "endMarker": 10,
+    "nextMarker": 10,
+    "hasMoreData": false,
+    "classes": [
+      {
+        "className": "Adresse",
+        "count": 1,
+        "header": ["~ObjectID", "Name"],
+        "data": [["A-1", "Muster"]]
+      }
+    ],
+    "excluded": [],
+    "deleted": ["A-0"]
+  }
+}
